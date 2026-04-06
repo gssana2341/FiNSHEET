@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Layers, PenTool, Upload, Brain, TrendingUp, Presentation, Plus, Eye, ShoppingCart, LayoutGrid, List as ListIcon, FileText, MoreVertical } from 'lucide-react';
+import { BookOpen, Layers, PenTool, Upload, Brain, TrendingUp, Presentation, Plus, Eye, ShoppingCart, LayoutGrid, List as ListIcon, FileText, MoreVertical, X, Search, ChevronDown, Clock, SlidersHorizontal, History } from 'lucide-react';
 import { t, onLangChange } from '../i18n';
 import { libraryItems } from '../data/mockLibrary';
+import { purchaseHistory } from '../data/mockPurchases';
 import { sampleQuiz } from '../data/mockQuiz';
 import { creatorItems } from '../data/mockCreator';
 import Card from '../components/ui/Card';
@@ -13,6 +14,7 @@ import QuizView from '../components/ai/QuizView';
 import FlashcardView from '../components/ai/FlashcardView';
 import UploadForm from '../components/creator/UploadForm';
 import NoteEditor from '../components/editing/NoteEditor';
+import Toast from '../components/ui/Toast';
 import './StubPage.css';
 import './LibraryPage.css';
 
@@ -26,6 +28,9 @@ export default function LibraryPage({ onOpenEditor }) {
   const [, setLangTick] = useState(0);
   const [activeTab, setActiveTab] = useState('my'); // 'my' | 'flashcards' | 'creator'
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [items, setItems] = useState(libraryItems);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('updated'); // 'updated' | 'title' | 'type' | 'opened'
   
   // Modals
   const [showCreateTypeModal, setShowCreateTypeModal] = useState(false);
@@ -35,6 +40,8 @@ export default function LibraryPage({ onOpenEditor }) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isTablet, setIsTablet] = useState(window.innerWidth > 768);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     const handleOutsideClick = () => setOpenMenuId(null);
@@ -50,18 +57,98 @@ export default function LibraryPage({ onOpenEditor }) {
     return onLangChange(() => setLangTick((n) => n + 1));
   }, []);
 
+  const handleRestoreItem = (itemData) => {
+    // Check if item already exists in library
+    if (items.find(i => i.id === itemData.id)) {
+      setToastMessage(`"${itemData.title}" is already in your library.`);
+      setTimeout(() => setToastMessage(''), 3000);
+      return;
+    }
+
+    // Add back to library (simulated)
+    const newItem = {
+      ...itemData,
+      type: 'purchased',
+      isOwned: true,
+      purchasedAt: new Date().toISOString().split('T')[0]
+    };
+    setItems([newItem, ...items]);
+    setToastMessage(`Successfully restored "${itemData.title}"!`);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
+  const handleDownloadDevice = (itemData) => {
+    setToastMessage(`Downloading "${itemData.title}" to device...`);
+    setTimeout(() => {
+      setToastMessage(`Download complete! Check your Downloads folder.`);
+      setTimeout(() => setToastMessage(''), 3000);
+    }, 1500);
+  };
+
   const tabs = [
     { id: 'my', label: t('library.tabMySummaries'), icon: BookOpen },
-    { id: 'flashcards', label: t('library.tabFlashcards'), icon: Layers },
+    { id: 'history', label: t('library.tabPurchaseHistory'), icon: History },
     { id: 'creator', label: t('library.tabCreatorCenter'), icon: PenTool },
   ];
 
-  // Filtering for Library (Combining AI and Purchased)
-  const filtered = libraryItems.filter((item) => {
-    if (activeTab === 'my') return item.type === 'ai_summary' || item.type === 'purchased';
-    if (activeTab === 'flashcards') return item.type === 'flashcard';
-    return false;
-  });
+  // Filtering and Sorting logic
+  const filtered = items
+    .filter((item) => {
+      // 1. Tab filter
+      if (activeTab === 'my') {
+        const isMyType = item.type === 'ai_summary' || item.type === 'purchased' || item.type === 'flashcard';
+        if (!isMyType) return false;
+      } else {
+        return false;
+      }
+      
+      // 2. Search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const titleMatch = item.title.toLowerCase().includes(query);
+        const subjectMatch = item.subject && item.subject.toLowerCase().includes(query);
+        return titleMatch || subjectMatch;
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'title') return a.title.localeCompare(b.title);
+      if (sortBy === 'type') return a.type.localeCompare(b.type);
+      if (sortBy === 'updated') {
+        const dateA = new Date(a.updatedAt || a.createdAt || 0);
+        const dateB = new Date(b.updatedAt || b.createdAt || 0);
+        return dateB - dateA;
+      }
+      if (sortBy === 'opened') {
+        const dateA = new Date(a.lastOpened || 0);
+        const dateB = new Date(b.lastOpened || 0);
+        return dateB - dateA;
+      }
+      return 0;
+    });
+
+  const handleCreateEmpty = () => {
+    const newItem = {
+      id: `new-${Date.now()}`,
+      title: 'Untitled Note',
+      subject: 'New Document',
+      type: 'ai_summary',
+      pageCount: 1,
+      content: 'Start typing your notes here...',
+      createdAt: new Date().toISOString()
+    };
+    setItems([newItem, ...items]);
+    setShowCreateTypeModal(false);
+    onOpenEditor(newItem);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('ยืนยันหน้าการลบสรุปนี้?')) {
+      setItems(items.filter(item => item.id !== id));
+      setOpenMenuId(null);
+    }
+  };
 
   const handleFileUpload = () => {
     setIsStreaming(true);
@@ -170,22 +257,50 @@ export default function LibraryPage({ onOpenEditor }) {
             </button>
           );
         })}
-        {activeTab !== 'creator' && (
-          <div className="view-toggle-group" style={{ marginLeft: 'auto', marginBottom: '8px' }}>
-            <button 
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`} 
-              onClick={() => setViewMode('list')}
-              title="List View"
-            >
-              <ListIcon size={18} />
-            </button>
-            <button 
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} 
-              onClick={() => setViewMode('grid')}
-              title="Grid View"
-            >
-              <LayoutGrid size={18} />
-            </button>
+        {activeTab !== 'creator' && activeTab !== 'history' && (
+          <div className="library-controls">
+            <div className="library-search-wrapper">
+              <Search size={16} className="search-icon" />
+              <input 
+                type="text" 
+                className="library-search-input" 
+                placeholder={t('common.search')} 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <div className="library-sort-wrapper">
+              <SlidersHorizontal size={14} className="sort-icon-left" />
+              <select 
+                className="library-sort-select" 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="updated">{t('library.sortUpdated') || 'แก้ไขล่าสุด'}</option>
+                <option value="opened">{t('library.sortOpened') || 'เปิดล่าสุด'}</option>
+                <option value="title">{t('library.sortTitle') || 'ชื่อ (A-Z)'}</option>
+                <option value="type">{t('library.sortType') || 'ประเภท'}</option>
+              </select>
+              <ChevronDown size={14} className="sort-chevron" />
+            </div>
+
+            <div className="view-toggle-group">
+              <button 
+                className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`} 
+                onClick={() => setViewMode('list')}
+                title="List View"
+              >
+                <ListIcon size={18} />
+              </button>
+              <button 
+                className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} 
+                onClick={() => setViewMode('grid')}
+                title="Grid View"
+              >
+                <LayoutGrid size={18} />
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -193,6 +308,42 @@ export default function LibraryPage({ onOpenEditor }) {
       <div className="stub-content-area">
         {activeTab === 'creator' ? (
           <CreatorDashboard />
+        ) : activeTab === 'history' ? (
+          <div className="purchase-history-view animate-fade-in">
+            <div className="history-table-container">
+              <table className="history-table">
+                <thead>
+                  <tr>
+                    <th>{t('library.orderId')}</th>
+                    <th>{t('library.purchaseDate')}</th>
+                    <th>{t('explore.title')}</th>
+                    <th>{t('library.totalPrice')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {purchaseHistory.flatMap(order => 
+                    order.items.map(item => ({...item, orderId: order.id, date: order.date}))
+                  ).map((item, idx) => (
+                    <tr key={`${item.orderId}-${item.id}-${idx}`}>
+                      <td className="order-id-cell">{item.orderId}</td>
+                      <td className="date-cell">{item.date}</td>
+                      <td>
+                        <div 
+                          className="order-item-row clickable-history-item"
+                          onClick={() => setSelectedHistoryItem(item)}
+                        >
+                          <span className="order-item-title">{item.title}</span>
+                        </div>
+                      </td>
+                      <td className="price-cell">
+                        {item.price === 0 ? t('explore.free') : `฿${(item.price / 100).toLocaleString()}`}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
           <div className={viewMode === 'grid' ? "library-grid animate-fade-in" : "stub-list animate-fade-in"}>
             {/* Create New Card (Grid Mode Only) */}
@@ -221,33 +372,34 @@ export default function LibraryPage({ onOpenEditor }) {
                       ) : null}
                       
                       {!item.coverUrl && <span className="lib-cover-title">{item.title}</span>}
-                      
-                      <div className="lib-card-more-wrapper" onClick={(e) => e.stopPropagation()}>
-                        <button 
-                          className={`lib-card-more-btn ${openMenuId === item.id ? 'active' : ''}`}
-                          onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
-                        >
-                          <MoreVertical size={18} />
-                        </button>
-                        
-                        {openMenuId === item.id && (
-                          <div className="lib-card-dropdown animate-fade-in shadow-xl">
-                            <button className="dropdown-item" onClick={() => { setOpenMenuId(null); setShowQuizModal(true); }}>
-                              <Brain size={14} /> <span>{t('home.takeQuiz')}</span>
-                            </button>
-                            <button className="dropdown-item" onClick={() => { setOpenMenuId(null); setShowFlashcardModal(true); }}>
-                              <Layers size={14} /> <span>{t('library.tabFlashcards')}</span>
-                            </button>
-                            <div className="dropdown-divider" />
-                            <button className="dropdown-item dropdown-item--danger" onClick={() => setOpenMenuId(null)}>
-                              <X size={14} /> {t('common.delete')}
-                            </button>
-                          </div>
-                        )}
-                      </div>
                     </div>
                     <div className="lib-grid-info">
-                      <h4 className="lib-grid-title truncate">{item.title}</h4>
+                      <div className="lib-grid-title-row">
+                        <h4 className="lib-grid-title truncate">{item.title}</h4>
+                        <div className="lib-card-more-wrapper" onClick={(e) => e.stopPropagation()}>
+                          <button 
+                            className={`lib-card-more-btn ${openMenuId === item.id ? 'active' : ''}`}
+                            onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          
+                          {openMenuId === item.id && (
+                            <div className="lib-card-dropdown animate-fade-in shadow-xl">
+                              <button className="dropdown-item" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); setShowQuizModal(true); }}>
+                                <Brain size={18} /> <span>{t('home.takeQuiz')}</span>
+                              </button>
+                              <button className="dropdown-item" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); setShowFlashcardModal(true); }}>
+                                <Layers size={18} /> <span>{t('library.tabFlashcards')}</span>
+                              </button>
+                              <div className="dropdown-divider" />
+                              <button className="dropdown-item dropdown-item--danger" onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}>
+                                <X size={18} /> <span>{t('common.delete')}</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       <p className="lib-grid-meta truncate">{item.subject} • {item.pageCount || item.cardCount} pages</p>
                     </div>
                   </div>
@@ -302,7 +454,7 @@ export default function LibraryPage({ onOpenEditor }) {
               <p>นำเข้าไฟล์ PDF, สไลด์ และให้ AI ย่อยเนื้อหาพร้อมสร้าง Quiz ให้อัตโนมัติ</p>
             </div>
           </Card>
-          <Card variant="default" className="create-type-card" onClick={() => { setShowCreateTypeModal(false); alert('สร้างสมุดจดเปล่าสำเร็จ!'); }}>
+          <Card variant="default" className="create-type-card" onClick={handleCreateEmpty}>
             <div className="create-type-icon"><FileText size={32} color="var(--color-info)"/></div>
             <div className="create-type-info">
               <h3>สมุดจด/สรุปว่างเปล่า</h3>
@@ -335,6 +487,80 @@ export default function LibraryPage({ onOpenEditor }) {
       <Modal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)} title="Upload Sheet for Sale" size="lg">
         <UploadForm onSubmit={() => setShowUploadModal(false)} onCancel={() => setShowUploadModal(false)} />
       </Modal>
+      {/* Slip Modal (Individual Item) */}
+      {selectedHistoryItem && (
+        <div className="receipt-overlay" onClick={() => setSelectedHistoryItem(null)}>
+          <div className="receipt-modal animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="receipt-header">
+              <div className="receipt-logo">
+                <img src="/lovesheet_icon_final (1).png" alt="LOVESHEET" className="receipt-logo-img" />
+                <span>LOVESHEET</span>
+              </div>
+              <button className="receipt-close" onClick={() => setSelectedHistoryItem(null)}><X size={20}/></button>
+            </div>
+            
+            <div className="receipt-body">
+              <div className="receipt-title-section">
+                <h2>{t('library.receiptTitle')}</h2>
+                <div className="receipt-status-badge">Completed</div>
+              </div>
+
+              <div className="receipt-info-grid">
+                <div className="receipt-info-item">
+                  <label>{t('library.orderId')}</label>
+                  <span>{selectedHistoryItem.orderId}</span>
+                </div>
+                <div className="receipt-info-item">
+                  <label>{t('library.purchaseDate')}</label>
+                  <span>{selectedHistoryItem.date}</span>
+                </div>
+                <div className="receipt-info-item">
+                  <label>{t('library.paymentMethod')}</label>
+                  <span>LOVESHEET Wallet</span>
+                </div>
+              </div>
+
+              <div className="receipt-items">
+                <div className="receipt-item-group">
+                  <div className="receipt-item-row">
+                    <span className="receipt-item-name">{selectedHistoryItem.title}</span>
+                    <span className="receipt-item-price">
+                      {selectedHistoryItem.price === 0 ? t('explore.free') : `฿${(selectedHistoryItem.price / 100).toLocaleString()}`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="receipt-footer">
+                <div className="receipt-total-row">
+                  <span>{t('cart.total')}</span>
+                  <span className="receipt-total-amount">
+                    {selectedHistoryItem.price === 0 ? t('explore.free') : `฿${(selectedHistoryItem.price / 100).toLocaleString()}`}
+                  </span>
+                </div>
+                <div className="receipt-transaction-id">
+                  {t('library.transactionId')}: TXN-{Math.random().toString(36).substr(2, 9).toUpperCase()}
+                </div>
+              </div>
+            </div>
+            
+            <div className="receipt-actions-footer">
+              <div className="receipt-primary-actions">
+                <button className="receipt-action-btn" onClick={() => handleRestoreItem(selectedHistoryItem)}>
+                  <BookOpen size={16} /> <span>{t('library.restoreToLibrary')}</span>
+                </button>
+                <button className="receipt-action-btn" onClick={() => handleDownloadDevice(selectedHistoryItem)}>
+                  <Upload size={16} style={{ transform: 'rotate(180deg)' }} /> <span>{t('library.downloadToDevice')}</span>
+                </button>
+              </div>
+              <button className="receipt-print-btn" onClick={() => window.print()}>Print Receipt</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      <Toast visible={!!toastMessage} message={toastMessage} type="success" />
     </div>
   );
 }

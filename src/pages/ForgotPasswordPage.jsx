@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, ArrowLeft, Send, CheckCircle } from 'lucide-react';
+import { Mail, ArrowLeft, Send, CheckCircle, Globe, Key } from 'lucide-react';
 import { t, getLang, setLang, onLangChange } from '../i18n';
 import './AuthPages.css';
 
@@ -38,7 +38,7 @@ export default function ForgotPasswordPage({ onGoToLogin }) {
       <div className="auth-container auth-container--single">
         <div className="auth-form-panel auth-form-panel--full">
           <button className="auth-lang-toggle" onClick={() => setLang(getLang() === 'en' ? 'th' : 'en')}>
-            🌐 {getLang().toUpperCase()}
+            <Globe size={16} /> <span>{getLang().toUpperCase()}</span>
           </button>
 
           <div className="auth-form-wrapper auth-form-wrapper--narrow">
@@ -48,9 +48,11 @@ export default function ForgotPasswordPage({ onGoToLogin }) {
               <span>{t('auth.backToLogin')}</span>
             </button>
 
-            {/* Logo */}
+            {/* Logo area */}
             <div className="auth-form-logo-center">
-              <div className="auth-brand-logo">F</div>
+              <div className="forgot-icon-ring">
+                <Key size={32} color="var(--color-primary)" />
+              </div>
             </div>
 
             {!isSent ? (

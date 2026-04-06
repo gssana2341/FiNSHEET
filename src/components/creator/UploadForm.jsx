@@ -9,6 +9,7 @@ const SUGGESTED_PRICES = [29, 49, 79];
 export default function UploadForm({ onSubmit = () => {}, onCancel = () => {} }) {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [subject, setSubject] = useState('');
   const [university, setUniversity] = useState('');
   const [price, setPrice] = useState(49);
@@ -30,6 +31,7 @@ export default function UploadForm({ onSubmit = () => {}, onCancel = () => {} })
       onSubmit({
         file,
         title,
+        description,
         subject,
         university,
         priceSatang: price * 100,
@@ -68,6 +70,18 @@ export default function UploadForm({ onSubmit = () => {}, onCancel = () => {} })
       <div className="upload-form-field">
         <label className="upload-form-label">Title *</label>
         <input className="upload-form-input" placeholder="e.g. Calculus II Complete Summary" value={title} onChange={(e) => setTitle(e.target.value)} />
+      </div>
+
+      {/* Description */}
+      <div className="upload-form-field">
+        <label className="upload-form-label">Description</label>
+        <textarea 
+          className="upload-form-input upload-form-textarea" 
+          placeholder="Describe what is inside this summary... (e.g. key topics covered, who is it for)" 
+          value={description} 
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+        />
       </div>
 
       {/* Subject + University */}

@@ -85,6 +85,19 @@ export default function PaymentModal({ amount, onClose, onSuccess }) {
               </div>
             )}
 
+            {method === 'card' && (
+              <div className="payment-card-form animate-fade-in">
+                <div className="card-input-wrapper">
+                  <CreditCard size={18} className="card-input-icon" />
+                  <input type="text" placeholder="Card Number" className="payment-card-input" />
+                </div>
+                <div className="payment-card-row">
+                  <input type="text" placeholder="MM/YY" className="payment-card-input" />
+                  <input type="text" placeholder="CVC" className="payment-card-input" />
+                </div>
+              </div>
+            )}
+
             <div className="payment-footer">
               <Button 
                 variant="primary" 

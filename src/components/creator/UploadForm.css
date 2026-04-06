@@ -39,6 +39,13 @@
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
+.upload-form-textarea {
+  height: auto;
+  min-height: 80px;
+  padding: var(--space-sm) var(--space-md);
+  resize: vertical;
+}
+
 .upload-form-input::placeholder {
   color: var(--color-text-tertiary);
 }

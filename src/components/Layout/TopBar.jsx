@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Coins } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { t, getLang, setLang, onLangChange } from '../../i18n';
 import { currentUser } from '../../data/mockUsers';
 import { useCart } from '../../context/CartContext';
@@ -20,8 +20,6 @@ export default function TopBar({ activePage, onNavigate }) {
     setLang(getLang() === 'en' ? 'th' : 'en');
   };
 
-  const creditDisplay = (currentUser.creditBalance / 100).toFixed(0);
-
   const centerTabs = [
     { id: 'explore', labelKey: 'nav.explore' },
     { id: 'library', labelKey: 'nav.library' },
@@ -32,8 +30,8 @@ export default function TopBar({ activePage, onNavigate }) {
     <header className="topbar" id="topbar">
       <div className="topbar-left">
         <div className="topbar-logo-brand" onClick={() => onNavigate && onNavigate('explore')}>
-          <div className="topbar-logo-icon">F</div>
-          <span className="topbar-logo-text">FiNSHEET</span>
+          <img src="/lovesheet_icon_final (1).png" alt="LOVESHEET Logo" className="topbar-logo-img" />
+          <span className="topbar-logo-text">LOVESHEET</span>
         </div>
       </div>
 
@@ -65,11 +63,6 @@ export default function TopBar({ activePage, onNavigate }) {
               onClose={() => setIsStreakOpen(false)}
             />
           )}
-        </div>
-
-        <div className="topbar-credits" id="credit-display">
-          <Coins size={16} />
-          <span>฿{creditDisplay}</span>
         </div>
 
         <button

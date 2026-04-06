@@ -18,7 +18,7 @@ const ONBOARDING_SLIDES = [
   },
   {
     id: 'earn',
-    image: '/marketplace_shop_1775463350161.png', // Assuming we have some image, fallback if missing
+    image: '/earn_illustration_hero.png',
     title: 'Earn While You Learn',
     desc: 'Turn your hard work into passive income by selling your beautifully crafted sheets.'
   }
@@ -33,6 +33,12 @@ export default function HomePage({ onNavigate }) {
     } else {
       // Go to register
       onNavigate('register'); // We will intercept this in App.jsx
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(prev => prev - 1);
     }
   };
 
@@ -86,11 +92,16 @@ export default function HomePage({ onNavigate }) {
               Log In
             </Button>
             <p className="onboarding-login-hint">
-              New to FiNSHEET? <button onClick={() => onNavigate('register')}>Sign Up</button>
+              New to LOVESHEET? <button onClick={() => onNavigate('register')}>Sign Up</button>
             </p>
           </div>
         ) : (
           <div className="onboarding-nav-actions">
+            {currentSlide > 0 && (
+              <Button variant="ghost" className="onboarding-prev-btn" onClick={handlePrev}>
+                Back
+              </Button>
+            )}
             <Button variant="primary" className="onboarding-next-btn" onClick={handleNext}>
               Next <ChevronRight size={20} />
             </Button>

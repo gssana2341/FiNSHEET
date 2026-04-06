@@ -1,3 +1,12 @@
+#preview-modal .modal-container {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#preview-modal .modal-container::-webkit-scrollbar {
+  display: none;
+}
+
 .preview-modal-content {
   display: flex;
   flex-direction: column;
@@ -34,16 +43,15 @@
 }
 
 .preview-hero-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  display: inline-block;
   color: white;
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: var(--weight-bold);
-  box-shadow: var(--shadow-sm);
-  z-index: 2;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
 }
 
 .preview-hero-placeholder {
@@ -105,20 +113,27 @@
 }
 
 .preview-action-box {
-  background: var(--color-surface-hover);
-  padding: var(--space-lg);
+  background: var(--color-primary-light);
+  padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-lg);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-md);
-  margin-top: auto;
-  border: 1px solid var(--color-border);
+  margin-top: var(--space-sm);
+  border: 1px solid rgba(249, 115, 22, 0.1);
 }
 
 .preview-price {
-  font-size: var(--text-h1);
-  font-weight: var(--weight-bold);
+  font-size: 24px;
+  font-weight: 800;
   color: var(--color-primary);
+}
+
+#preview-buy-btn {
+  width: auto;
+  min-width: 140px;
 }
 
 /* Details Grid */
@@ -210,17 +225,26 @@
   gap: var(--space-md);
   padding-bottom: var(--space-sm);
   scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.preview-pages::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 .preview-page {
-  flex: 0 0 calc(50% - var(--space-sm));
-  min-width: 200px;
-  background: var(--color-surface-2);
+  flex: 0 0 280px;
+  height: 380px;
+  background: white;
   border-radius: var(--radius-md);
-  padding: var(--space-md);
   position: relative;
   border: 1px solid var(--color-border);
   scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-md);
 }
 
 @media (max-width: 480px) {
@@ -230,7 +254,7 @@
 }
 
 .preview-page--visible {
-  border-top: 3px solid var(--color-border);
+  border-top: 4px solid var(--color-primary);
 }
 
 .preview-page-header {

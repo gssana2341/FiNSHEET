@@ -11,8 +11,8 @@ export default function GuestTopBar({ onLogin, onRegister }) {
   return (
     <header className="guest-topbar">
       <div className="guest-topbar-left">
-        <div className="guest-brand-logo">F</div>
-        <span className="guest-brand-text">FiNSHEET</span>
+        <img src="/lovesheet_icon_final (1).png" alt="LOVESHEET Logo" className="guest-brand-img" />
+        <span className="guest-brand-text">LOVESHEET</span>
       </div>
 
       <div className="guest-topbar-right">

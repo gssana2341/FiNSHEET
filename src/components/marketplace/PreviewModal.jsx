@@ -23,12 +23,12 @@ export default function PreviewModal({ isOpen, onClose, item, onBuy }) {
             className="preview-hero-cover" 
             style={item.coverUrl ? { backgroundImage: `url(${item.coverUrl})` } : { background: `linear-gradient(135deg, ${subjectColor}15, ${subjectColor}30)`, borderColor: subjectColor }}
           >
-            <div className="preview-hero-badge" style={{ background: subjectColor }}>{item.subject}</div>
             {!item.coverUrl && <span className="preview-hero-placeholder">📄 {item.totalPages} Pages</span>}
           </div>
 
           {/* Right: Essential Purchase Meta */}
           <div className="preview-hero-meta">
+            <div className="preview-hero-badge" style={{ background: subjectColor }}>{item.subject}</div>
             <h2 className="preview-hero-title">{item.title}</h2>
             
             <div className="preview-rating-row">
@@ -47,7 +47,6 @@ export default function PreviewModal({ isOpen, onClose, item, onBuy }) {
               <Button
                 variant="primary"
                 size="lg"
-                fullWidth
                 onClick={() => { onClose(); onBuy(item); }}
                 id="preview-buy-btn"
               >

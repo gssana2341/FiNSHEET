@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Mail, Lock, LogIn } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, LogIn, Sparkles, Brain, DollarSign, Flame, Globe } from 'lucide-react';
 import { t, getLang, setLang, onLangChange } from '../i18n';
 import './AuthPages.css';
 
@@ -58,24 +58,24 @@ export default function LoginPage({ onLogin, onGoToRegister, onGoToForgot }) {
         {/* Left: Brand Panel */}
         <div className="auth-brand-panel">
           <div className="auth-brand-content">
-            <div className="auth-brand-logo">F</div>
-            <h1 className="auth-brand-name">FiNSHEET</h1>
+            <img src="/lovesheet_icon_final (1).png" alt="LOVESHEET Logo" className="auth-brand-img" />
+            <h1 className="auth-brand-name">LOVESHEET</h1>
             <p className="auth-brand-tagline">{t('tagline')}</p>
             <div className="auth-brand-features">
               <div className="auth-brand-feature">
-                <span>📄</span>
+                <Sparkles size={18} />
                 <span>AI-powered summaries</span>
               </div>
               <div className="auth-brand-feature">
-                <span>🧪</span>
+                <Brain size={18} />
                 <span>Smart quizzes & flashcards</span>
               </div>
               <div className="auth-brand-feature">
-                <span>💰</span>
+                <DollarSign size={18} />
                 <span>Sell your study notes</span>
               </div>
               <div className="auth-brand-feature">
-                <span>🔥</span>
+                <Flame size={18} />
                 <span>Study streaks & rewards</span>
               </div>
             </div>
@@ -86,7 +86,7 @@ export default function LoginPage({ onLogin, onGoToRegister, onGoToForgot }) {
         <div className="auth-form-panel">
           {/* Lang Toggle */}
           <button className="auth-lang-toggle" onClick={() => setLang(getLang() === 'en' ? 'th' : 'en')}>
-            🌐 {getLang().toUpperCase()}
+            <Globe size={16} /> <span>{getLang().toUpperCase()}</span>
           </button>
 
           <div className="auth-form-wrapper">

@@ -32,18 +32,10 @@
   border-radius: var(--radius-md);
 }
 
-.topbar-logo-icon {
-  width: 34px;
-  height: 34px;
-  background: var(--gradient-hero);
-  border-radius: 10px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 1.3rem;
-  box-shadow: var(--shadow-warm);
+.topbar-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .topbar-logo-text {

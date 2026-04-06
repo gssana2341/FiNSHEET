@@ -4,7 +4,6 @@ import { t, onLangChange } from '../i18n';
 import { marketplaceItems } from '../data/mockMarketplace';
 import SummaryCard from '../components/marketplace/SummaryCard';
 import PreviewModal from '../components/marketplace/PreviewModal';
-import PurchaseModal from '../components/marketplace/PurchaseModal';
 import DraggableFAB from '../components/ui/DraggableFAB';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
@@ -18,7 +17,6 @@ export default function ExplorePage() {
   const [activeFilter, setActiveFilter] = useState('filterAll');
   const [searchQuery, setSearchQuery] = useState('');
   const [previewItem, setPreviewItem] = useState(null);
-  const [purchaseItem, setPurchaseItem] = useState(null);
 
   // Advanced Filters
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -111,9 +109,6 @@ export default function ExplorePage() {
       {/* Header */}
       <div className="explore-header">
         <h1 className="explore-title">{t('explore.title')}</h1>
-        <p className="explore-subtitle">
-          {filteredItems.length} summaries available
-        </p>
       </div>
 
       {/* Search Bar + Filter Toggle */}
@@ -178,10 +173,11 @@ export default function ExplorePage() {
         </div>
       )}
 
-      {/* Filter Chips */}
-      <div className="explore-filters" id="explore-filters">
-        {filters.map((f) => (
-          <button
+      {/* Filter Row */}
+      <div className="explore-filter-row">
+        <div className="explore-filters" id="explore-filters">
+          {filters.map((f) => (
+            <button
             key={f}
             className={`filter-chip ${activeFilter === f ? 'filter-chip--active' : ''}`}
             onClick={() => setActiveFilter(f)}
@@ -189,6 +185,10 @@ export default function ExplorePage() {
             {t(`explore.${f}`)}
           </button>
         ))}
+        </div>
+        <p className="explore-subtitle">
+          {filteredItems.length} summaries available
+        </p>
       </div>
 
       {/* Grid */}
@@ -232,12 +232,6 @@ export default function ExplorePage() {
         onClose={() => setPreviewItem(null)}
         item={previewItem}
         onBuy={handleAddToCart}
-      />
-
-      <PurchaseModal
-        isOpen={!!purchaseItem}
-        onClose={() => setPurchaseItem(null)}
-        item={purchaseItem}
       />
 
       {/* Toast Notification */}

@@ -147,7 +147,15 @@
   color: var(--color-error);
 }
 
-/* Chips */
+/* Filters Row */
+.explore-filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+}
+
 .explore-filters {
   display: flex;
   gap: var(--space-sm);
@@ -155,6 +163,13 @@
   padding-bottom: var(--space-xs);
   -ms-overflow-style: none;
   scrollbar-width: none;
+  flex: 1;
+}
+
+.explore-filter-row .explore-subtitle {
+  white-space: nowrap;
+  margin-left: auto;
+  padding-bottom: var(--space-xs);
 }
 
 .explore-filters::-webkit-scrollbar { display: none; }

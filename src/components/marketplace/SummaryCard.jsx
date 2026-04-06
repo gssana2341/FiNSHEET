@@ -13,13 +13,16 @@ export default function SummaryCard({ item, onClick, onBuy }) {
   return (
     <div className="summary-card" id={`summary-${item.id}`} onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       {/* Thumbnail / Cover */}
-      <div className="summary-card-cover" style={{ borderColor: subjectColor }}>
+      <div className="summary-card-cover">
+        <div className="summary-card-subject-badge" style={{ backgroundColor: subjectColor }}>
+          {item.subject}
+        </div>
         {item.coverUrl ? (
-          <img src={item.coverUrl} alt="cover" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+          <img src={item.coverUrl} alt="cover" className="summary-card-image" />
         ) : (
           <div className="summary-card-cover-inner" style={{ background: `linear-gradient(135deg, ${subjectColor}15, ${subjectColor}30)` }}>
             <span className="summary-card-cover-icon">📄</span>
-            <span className="summary-card-pages">{item.totalPages} pages</span>
+            <span className="summary-card-pages">{item.totalPages} {t('explore.pages')}</span>
           </div>
         )}
       </div>
@@ -28,31 +31,29 @@ export default function SummaryCard({ item, onClick, onBuy }) {
         {/* Title */}
         <h3 className="summary-card-title line-clamp-2">{item.title}</h3>
 
-        {/* Rating & Subject */}
-        <div className="summary-card-meta">
-          <div className="summary-card-subject" style={{ color: subjectColor }}>
-            {item.subject}
-          </div>
+        {/* Info Row: Rating & Price */}
+        <div className="summary-card-info-row">
           <div className="summary-card-rating">
             <Star size={12} fill="#F59E0B" stroke="#F59E0B" />
             <span>{item.rating}</span>
           </div>
+          <div className="summary-card-price-container">
+            <span className={`summary-card-price ${item.priceSatang === 0 ? 'summary-card-price--free' : ''}`}>
+              {priceDisplay}
+            </span>
+          </div>
         </div>
-      </div>
 
-      {/* Footer: Price + Add to Cart */}
-      <div className="summary-card-footer">
-        <span className={`summary-card-price ${item.priceSatang === 0 ? 'summary-card-price--free' : ''}`}>
-          {priceDisplay}
-        </span>
+        {/* Action Button */}
         <button
-          className="summary-card-btn-cart"
+          className="summary-card-btn-cart-modern"
           onClick={(e) => {
             e.stopPropagation();
             onBuy(item);
           }}
         >
           <ShoppingCart size={16} />
+          <span>{t('explore.addToCart')}</span>
         </button>
       </div>
     </div>

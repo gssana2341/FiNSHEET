@@ -19,14 +19,10 @@
   gap: var(--space-sm);
 }
 
-.guest-brand-logo {
-  width: 36px; height: 36px;
-  background: var(--gradient-hero);
-  color: white;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center; justify-content: center;
-  font-weight: 800; font-size: var(--text-h3);
+.guest-brand-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .guest-brand-text {
