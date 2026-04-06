@@ -1,0 +1,30 @@
+.streak-counter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  border-radius: var(--radius-pill);
+  border: 1px solid #FDBA74;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.streak-counter:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+  border-color: #F97316;
+}
+
+.streak-flame {
+  color: #F97316;
+  display: flex;
+  animation: flame 1.5s ease-in-out infinite;
+}
+
+.streak-days {
+  font-size: var(--text-label);
+  font-weight: var(--weight-bold);
+  color: #C2410C;
+}

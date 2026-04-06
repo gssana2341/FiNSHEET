@@ -1,0 +1,37 @@
+.draggable-fab {
+  position: fixed;
+  bottom: 90px; /* Above BottomTabBar */
+  right: var(--space-md);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  touch-action: none; /* Crucial for custom touch handlers */
+}
+
+.draggable-fab:active {
+  transform: scale(0.95);
+}
+
+.fab-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--color-error);
+  color: white;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

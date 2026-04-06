@@ -1,0 +1,85 @@
+.bottom-tab-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(255, 251, 245, 0.92);
+  border-top: 1px solid var(--color-border-subtle);
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 var(--space-md);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 100;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.tab-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.tab-item:active {
+  transform: scale(0.9);
+}
+
+.tab-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  transition: all var(--transition-fast);
+}
+
+.tab-icon-wrap--active {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.tab-item--active {
+  color: var(--color-primary);
+}
+
+.tab-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: fadeIn 0.3s ease;
+}
+
+.bottombar-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--color-error);
+  color: white;
+  font-size: 9px;
+  font-weight: bold;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--color-surface);
+}
+
+@media (max-width: 768px) {
+  .bottom-tab-bar {
+    display: flex;
+  }
+}

@@ -1,0 +1,1306 @@
+================================================================================
+  FiN BUDDY — PRODUCT REQUIREMENTS DOCUMENT & FULL BRIEF
+  Version 1.0  |  เมษายน 2026  |  Confidential — Internal Use Only
+  สำหรับ: Dev Team · Marketing · Product · Designer
+================================================================================
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  สารบัญ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  PART A  — Marketing Plan & Core Value        (สำหรับทีม Business & Marketing)
+  PART B  — Product Vision & User Insight      (สำหรับทุกทีม)
+  PART C  — Developer Requirements (PRD)       (สำหรับทีม Dev)
+  PART D  — Design System & UI Guide           (สำหรับ Designer & Dev)
+  PART E  — Legal & Compliance Architecture    (สำหรับ Dev + Legal)
+  PART F  — Technical Architecture             (สำหรับ Dev)
+  PART G  — Design Resources & AI Prompts      (สำหรับ Designer & Dev)
+  PART H  — MVP Roadmap & Priority             (สำหรับทุกทีม)
+
+
+================================================================================
+  PART A — MARKETING PLAN & CORE VALUE
+  สำหรับทีม Business & Marketing
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  A1. THE BIG IDEA — ทำไม FiN Buddy ถึงต้องมีอยู่
+────────────────────────────────────────────────────────────────────────────────
+
+  ปัญหาที่เราแก้:
+  เด็กไทยมีเลคเชอร์เยอะ มีข้อสอบเยอะ แต่ไม่มีเวลาอ่านทั้งหมด
+  และตลาดซื้อขายสรุปที่มีอยู่ในปัจจุบันยังไม่แฟร์กับ Creator
+  แพลตฟอร์มหัก GP สูง Creator ต้องขายแพง นักเรียนซื้อแพง ทุกคนแพ้
+
+  วิธีที่เราแก้:
+  1. AI ที่เข้าใจบริบทการเรียนไทย → ย่อยเลคเชอร์ให้เป็นภาษาเพื่อนติวเพื่อน
+  2. Marketplace ที่หัก GP ต่ำที่สุดในตลาด → ทุกฝ่ายได้ประโยชน์
+  3. Experience ที่ทำให้รู้สึกอยากอ่าน ไม่ใช่แค่เครื่องมือ
+
+  เป้าหมาย:
+  FiN Buddy ต้องเป็น "Space สำหรับคนอยากสอบผ่าน"
+  เปิดแอปแล้วได้ Energy กลับไป ไม่ใช่แค่ Tool ที่ใช้แล้วปิด
+
+
+────────────────────────────────────────────────────────────────────────────────
+  A2. THE CORE VIBE — ความรู้สึกที่ User ต้องได้รับ
+────────────────────────────────────────────────────────────────────────────────
+
+  One-liner:
+  "FiN Buddy คือ Studygram ที่มีชีวิต"
+
+  รายละเอียด:
+  - เปิดมาแล้วต้องรู้สึกมีไฟ ไม่กดดัน
+  - รู้สึกว่าการสอบผ่านไม่ใช่เรื่องยาก
+  - AI ทำให้ข้อมูลยากๆ ย่อยง่ายขึ้น
+  - มีสรุปจากคนเก่งทั่วประเทศรออยู่
+  - มีเพื่อนที่เรียนด้วยกัน (Leaderboard, Streak)
+
+  Feeling Keywords (ให้ Marketing ใช้เป็น Tone of Voice):
+  - กระตุ้น ไม่กดดัน
+  - ฉลาด ไม่วิชาการ
+  - เพื่อน ไม่อาจารย์
+  - สนุก ไม่เบื่อ
+  - ได้ผล ไม่ซับซ้อน
+
+
+────────────────────────────────────────────────────────────────────────────────
+  A3. UNIQUE SELLING PROPOSITIONS (USPs)
+────────────────────────────────────────────────────────────────────────────────
+
+  USP #1 — AI ที่เหนือกว่า (The Ultimate AI Helper)
+  ─────────────────────────────────────────────────
+  - ไม่ใช่แค่ Copy-Paste แล้วสรุป
+  - AI ถูก Prompt Engineer ให้เข้าใจบริบทการเรียนของเด็กไทย
+  - Output ออกมาเป็น "ภาษาเพื่อนติวเพื่อน" อ่านรู้เรื่องทันที
+  - รองรับไฟล์ PDF, รูปภาพ (OCR), และ Text โดยตรง
+  - Streaming Output แบบ ChatGPT — รู้สึกไม่ต้องรอ
+
+  USP #2 — Marketplace ที่แฟร์ที่สุด (Creator-Friendly)
+  ───────────────────────────────────────────────────────
+  เราคือ "ตัวกลาง" ที่ทุกฝ่ายได้ประโยชน์:
+
+  | Platform      | GP Cut | ผลลัพธ์                          |
+  |---------------|--------|----------------------------------|
+  | คู่แข่งทั่วไป  | 30%+   | Creator ขายแพง / User จ่ายแพง   |
+  | FiN Buddy     | 10-15% | Creator กำไรดี / User ราคาคุ้ม  |
+
+  กลยุทธ์: Volume-based
+  ขายถูกลง → ขายได้มากขึ้น → Creator กำไรรวมมากกว่าเดิม
+
+  USP #3 — Motivation Engine (ระบบกระตุ้นให้อยากเรียน)
+  ──────────────────────────────────────────────────────
+  - Study Streak: จำนวนวันที่เข้ามาเรียนต่อเนื่อง (เหมือน Duolingo)
+  - Leaderboard: อันดับผู้เรียนสัปดาห์นี้
+  - Progress Badge: รางวัลเล็กๆ เมื่อสรุปครบ / Quiz ผ่าน
+  - Goal Tracker: ตั้งเป้าหมายวันสอบ แอปนับถอยหลังให้
+
+
+────────────────────────────────────────────────────────────────────────────────
+  A4. TARGET AUDIENCE — ใครคือ User ของเรา
+────────────────────────────────────────────────────────────────────────────────
+
+  Primary Target: นักเรียน / นักศึกษา อายุ 15-25 ปี
+  - เรียนมหาวิทยาลัย / ม.ปลาย ที่มีเลคเชอร์เยอะ
+  - เตรียมสอบ (TCAS, สอบกลางภาค, สอบบอร์ด, วิชาชีพ)
+  - ใช้ iPad หรือสมาร์ทโฟนเป็นหลักในการเรียน
+  - เคยซื้อหรือขายสรุปผ่าน Facebook Group / Line
+
+  Secondary Target: Creator (คนขายสรุป)
+  - นักศึกษาที่อยากสร้าง Passive Income จากสรุปที่เขียนอยู่แล้ว
+  - Tutor อิสระที่อยากขายเนื้อหาผ่านช่องทางใหม่
+
+  Pain Points ที่ User มีอยู่ตอนนี้:
+  - ซื้อสรุปจาก Facebook แล้วได้ไฟล์ที่อ่านไม่รู้เรื่อง
+  - ไม่รู้จะเชื่อ Creator ไหนได้บ้าง (ไม่มี Review ที่น่าเชื่อถือ)
+  - AI ทั่วไปสรุปออกมาเป็นภาษาอังกฤษ หรือวิชาการเกินไป
+  - Marketplace อื่นหัก GP สูง ทำให้สรุปแพงเกินคุ้ม
+
+
+────────────────────────────────────────────────────────────────────────────────
+  A5. COMMUNICATION STRATEGY — วิธีสื่อสารกับตลาด
+────────────────────────────────────────────────────────────────────────────────
+
+  หลักการสำคัญ: "อย่าชูเรื่องกฎหมาย ชูเรื่องผลลัพธ์"
+
+  ✗ อย่าพูด → ✓ ให้พูดแทน
+  ─────────────────────────────────────────────────────────
+  "ป้องกันลิขสิทธิ์"
+    → "AI ช่วยเรียบเรียงเนื้อหาใหม่ให้เป็นสไตล์คุณเอง"
+
+  "ระบบตรวจสอบการละเมิด"
+    → "สรุปย่อยง่าย ไม่ซ้ำใคร เป็นสไตล์ของคุณ"
+
+  "Digital Watermark"
+    → "ทุก Purchase มีหลักฐานชัดเจน"
+
+  "เงื่อนไขและข้อตกลง"
+    → "ยืนยันง่ายๆ แค่คลิกเดียว"
+
+  Key Ad Copy (Result-Oriented) — พร้อมใช้งาน:
+  ─────────────────────────────────────────────
+  สำหรับ TikTok / Reels:
+  - "อ่านก่อนสอบ 1 คืนก็รอด"
+  - "ไม่ต้องจดเอง แค่โยนไฟล์เข้าแอป"
+  - "AI สรุปให้ นายแค่อ่าน"
+
+  สำหรับ Facebook / IG Story:
+  - "สรุปจากตัวท็อปทั่วประเทศ พร้อมให้โหลดทันที"
+  - "ราคาเป็นธรรม เพราะเราหักค่า GP น้อยที่สุด"
+  - "เรียนกับ AI เหมือนมีเพื่อนคนเก่งนั่งด้วย"
+
+  สำหรับ KOL / Influencer Brief:
+  - เน้นโชว์ขั้นตอน: "โยนไฟล์ → รอ 10 วิ → ได้สรุป"
+  - ให้ KOL ลองใช้จริงแล้ว React ตามความรู้สึก
+  - ห้ามพูดเรื่อง Tech หลังบ้าน ให้พูดเรื่องประสบการณ์
+
+
+================================================================================
+  PART B — PRODUCT VISION & USER INSIGHT
+  สำหรับทุกทีม (Dev · Marketing · Designer)
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  B1. PRODUCT PHILOSOPHY — แนวคิดหลักของสินค้า
+────────────────────────────────────────────────────────────────────────────────
+
+  "FiN Buddy ไม่ใช่แค่เครื่องมือ แต่คือ Space"
+
+  เวลา User เปิดแอปขึ้นมา เขาไม่ได้แค่ "ใช้งาน"
+  เขากำลัง "เข้ามาอยู่ในโหมดเรียน" และเราต้องทำให้โหมดนั้น
+  รู้สึกดี น่าอยู่ และทำให้เขาอยากกลับมาทุกวัน
+
+  3 เสาหลักของ Product:
+  1. AI Engine     → ทำให้การเรียนง่ายขึ้น
+  2. Marketplace   → ทำให้การซื้อ-ขายสรุปแฟร์ขึ้น
+  3. Motivation    → ทำให้อยากกลับมาใช้ทุกวัน
+
+
+────────────────────────────────────────────────────────────────────────────────
+  B2. USER JOURNEY MAP — เส้นทางของ User ตั้งแต่รู้จักจนซื้อ
+────────────────────────────────────────────────────────────────────────────────
+
+  1. Awareness
+     User เจอ TikTok / IG Reel ที่โชว์ "โยนไฟล์ → ได้สรุปใน 10 วิ"
+     → รู้สึกว่า "นี่แหละที่ต้องการ"
+
+  2. Download & Onboarding
+     - ดาวน์โหลดแอป → สมัครด้วย Google (ไม่ให้กรอก Form ยาว)
+     - ถามสั้นๆ 3 คำถาม: "กำลังเรียนอะไร? / สอบเมื่อไหร่? / ต้องการอะไรก่อน?"
+     - ตั้ง Study Goal ทันที
+
+  3. First Value (ภายใน 60 วินาทีแรก)
+     - แนะนำให้อัปโหลดไฟล์แรก
+     - AI สรุปให้เห็นทันที (Streaming)
+     - แสดง CTA: "สร้าง Quiz จากสรุปนี้" ให้ลองกด
+
+  4. Habit Formation
+     - เช้าวันถัดไปแอป Push Notification: "Study Streak ของคุณ: 2 วัน 🔥"
+     - เห็น Leaderboard ว่าคนอื่นเรียนไปเท่าไหร่แล้ว
+
+  5. Marketplace Discovery
+     - เห็น Feed แนะนำสรุปที่ตรงกับวิชาที่ตั้งไว้
+     - Preview 2 หน้าแรกฟรี → ซื้อด้วย Credit ในแอป
+
+  6. Creator Path (Optional)
+     - หลังใช้งาน 7 วัน แสดง Banner "ขายสรุปของคุณ รับรายได้จริง"
+     - เข้าสู่ Creator Onboarding Flow
+
+
+================================================================================
+  PART C — DEVELOPER REQUIREMENTS (PRD)
+  สำหรับทีม Dev
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  C1. PROJECT OBJECTIVE & SCOPE
+────────────────────────────────────────────────────────────────────────────────
+
+  Objective:
+  สร้าง EdTech Platform (MVP) ที่มี 2 Core Feature หลัก คือ
+  (1) AI Summarizer และ (2) Marketplace ซื้อขายสรุป
+  โดย UX/UI ต้องกระตุ้นให้อยากเรียน และรองรับทุก Device สมบูรณ์
+
+  Tech Stack ที่แนะนำ:
+  - Frontend:   React Native (หรือ Flutter หากทีมถนัดกว่า)
+  - Backend:    Node.js + Express (หรือ NestJS สำหรับโครงสร้างที่ดีกว่า)
+  - Database:   PostgreSQL (Relational) + Redis (Cache / Session)
+  - Storage:    AWS S3 หรือ Cloudflare R2 สำหรับไฟล์ PDF
+  - AI:         OpenAI API (GPT-4o-mini สำหรับ Cost Control) หรือ Gemini Flash
+  - OCR:        Google Vision API หรือ Tesseract.js (ถ้าต้องการ On-device)
+  - Payment:    Omise (รองรับ PromptPay + บัตรเครดิต ไทย)
+  - CDN:        Cloudflare
+  - Auth:       Firebase Auth หรือ Supabase Auth (Google / Apple Sign-In)
+
+  Timeline (MVP):
+  Week 1-2: Auth + AI Engine + File Upload
+  Week 2-3: Marketplace (Buy Flow) + Payment
+  Week 3-4: Creator Dashboard + Legal System + Polish
+
+
+────────────────────────────────────────────────────────────────────────────────
+  C2. PLATFORM & UI/UX REQUIREMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+  C2.1 Cross-Platform & Responsive Design
+  ─────────────────────────────────────────
+  - Build ครั้งเดียว รันได้ทั้ง iOS และ Android
+  - รองรับ iOS 15+ และ Android 11+
+
+  iPad / Tablet Support (สำคัญมาก):
+  ต้องทำ Adaptive Layout ที่แตกต่างจากมือถืออย่างชัดเจน
+
+  Layout บน iPad:
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Left Pane (320px)          │  Right Pane (ที่เหลือ)        │
+  │  ─────────────────────      │  ──────────────────────────── │
+  │  - ลิสต์สรุปที่มี           │  - เนื้อหา PDF / AI Summary  │
+  │  - Search Bar              │  - CTA Buttons               │
+  │  - Filter / Sort           │  - Quiz Panel (Slide-in)     │
+  └─────────────────────────────────────────────────────────────┘
+
+  Breakpoints ที่ต้องรองรับ:
+  < 600px   → Single Pane (Phone mode)
+  600-900px → Single Pane with bottom sheet drawer
+  > 900px   → Split Pane (iPad mode, 2 คอลัมน์)
+
+  ห้ามทำ:
+  - แอปมือถือที่ถูก Scale ขึ้นบน iPad โดยไม่ปรับ Layout
+  - ตัวหนังสือเล็กเกินไปบน iPad (ขั้นต่ำ 16px)
+  - ปุ่มเล็กเกินไปบนมือถือ (Touch Target ขั้นต่ำ 44x44px)
+
+  C2.2 Navigation Structure
+  ────────────────────────────
+  Bottom Tab Bar (มือถือ) / Sidebar (iPad):
+  [ Home ] [ Explore ] [ My Library ] [ Creator ] [ Profile ]
+
+  - Home: Dashboard + Quick Actions
+  - Explore: Marketplace Feed + Search + Filter
+  - My Library: สรุปที่สรุปเอง + สรุปที่ซื้อ + Flashcards
+  - Creator: Upload + Analytics + Earnings
+  - Profile: Goal Settings + Streak + Achievement
+
+
+────────────────────────────────────────────────────────────────────────────────
+  C3. CORE FEATURE: AI STUDY ENGINE
+────────────────────────────────────────────────────────────────────────────────
+
+  C3.1 File Input & Parsing
+  ──────────────────────────
+  ประเภทไฟล์ที่รองรับ:
+  - PDF (หลัก)
+  - รูปภาพ: JPG, PNG, HEIC (ต้องผ่าน OCR ก่อน)
+  - Text: Paste โดยตรงใน Text Area
+
+  PDF Parser Pipeline (ทำตามลำดับนี้):
+  Step 1: Extract raw text จาก PDF (ใช้ pdf-parse หรือ pdfminer)
+  Step 2: Clean text
+         - ลบ Header / Footer ที่ซ้ำในทุกหน้า
+         - แก้ Line Break ที่ผิดเพี้ยน (ขึ้นบรรทัดกลางคำ)
+         - ลบ Special Characters ที่เกิดจาก Encoding
+  Step 3: Chunk text เป็น Segment ≤ 2,000 tokens ต่อ chunk
+  Step 4: ส่งให้ AI พร้อม System Prompt
+
+  OCR Pipeline:
+  Step 1: Preprocess รูปภาพ (Deskew, Denoise, Enhance Contrast)
+  Step 2: ส่งให้ Google Vision API หรือ Tesseract
+  Step 3: ส่ง Output ต่อเข้า PDF Parser Pipeline ข้างต้น
+
+  C3.2 AI Processing — System Prompt (สำคัญมาก)
+  ─────────────────────────────────────────────────
+  System Prompt ที่ Dev ต้องใช้ (ปรับได้):
+  ─────────────────────────────────────────
+  "คุณคือเพื่อนที่ฉลาดมากที่กำลังอธิบายเนื้อหาการเรียนให้เพื่อน
+   พูดด้วยภาษาไทยที่เข้าใจง่าย เหมือนคุยกัน ไม่ต้องการภาษาวิชาการ
+   เมื่อสรุป ให้จัดรูปแบบดังนี้:
+
+   ## ประเด็นหลัก (ไม่เกิน 5 ข้อ)
+   ## รายละเอียดสำคัญ
+   ## สิ่งที่ออกสอบบ่อย (ถ้ามี)
+   ## จำง่ายๆ ด้วยคำย่อ หรือ Trick
+
+   ใช้ Emoji เล็กน้อยเพื่อแยกหัวข้อ ทำให้ดูไม่น่าเบื่อ"
+  ─────────────────────────────────────────────
+
+  Model ที่แนะนำ:
+  - GPT-4o-mini หรือ Gemini 1.5 Flash (Cost-effective สำหรับ MVP)
+  - พิจารณา Claude Haiku สำหรับ OCR + Short Summary
+
+  Token Limit:
+  - Input:  ไม่เกิน 4,000 tokens ต่อ Request
+  - Output: ไม่เกิน 1,500 tokens ต่อ Request
+  - ถ้าไฟล์ใหญ่กว่า: ให้ Chunk แล้ว Summarize เป็นรอบๆ
+
+  C3.3 Streaming Output
+  ──────────────────────
+  ต้องใช้ Server-Sent Events (SSE) หรือ WebSocket
+  เพื่อทยอยส่ง Token ออกมาทีละตัวแบบ ChatGPT
+
+  Code Pattern (Node.js):
+  ────────────────────────
+  const stream = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    stream: true,
+    messages: [...]
+  });
+
+  for await (const chunk of stream) {
+    const token = chunk.choices[0]?.delta?.content || "";
+    res.write(`data: ${JSON.stringify({ token })}\n\n`);
+  }
+  res.end();
+  ────────────────────────
+
+  Frontend ต้องรับ Stream และ append text แบบ Real-time
+
+  C3.4 Post-Summary Actions (CTA Buttons)
+  ─────────────────────────────────────────
+  หลังจาก AI สรุปเสร็จ ต้องแสดงปุ่มต่อไปนี้ทันที:
+
+  [ 🧪 สร้าง Quiz จากสรุปนี้ ]
+     → ส่ง Summary กลับไปให้ AI สร้าง 5-10 ข้อ Multiple Choice
+
+  [ 🃏 แปลงเป็น Flashcards ]
+     → AI แยก Key Term : Definition เป็น Pair
+     → แสดงใน Flip Card Interface
+
+  [ 💾 บันทึกลงคลัง ]
+     → Save ลง My Library ของ User
+
+  [ 🏪 ขายใน Marketplace ]
+     → เข้าสู่ Creator Upload Flow (ถ้า User เป็น Creator)
+
+  C3.5 Quiz Generator
+  ─────────────────────
+  AI Prompt สำหรับ Quiz:
+  ────────────────────────
+  "จากเนื้อหาที่สรุปมา ให้สร้างข้อสอบ Multiple Choice 5-10 ข้อ
+   แต่ละข้อมี 4 ตัวเลือก มีเฉลยและคำอธิบายสั้นๆ ว่าทำไมถึงถูก
+   ตอบในรูปแบบ JSON เท่านั้น ไม่ต้องมีข้อความอื่น:
+   {
+     questions: [
+       {
+         question: "...",
+         options: ["A", "B", "C", "D"],
+         answer: "A",
+         explanation: "..."
+       }
+     ]
+   }"
+  ────────────────────────
+
+  UI Quiz:
+  - แสดงทีละข้อ ไม่แสดงเฉลยจนกว่าจะกดเลือก
+  - หลังเสร็จ แสดงคะแนน + Summary ว่าข้อไหนผิด
+
+
+────────────────────────────────────────────────────────────────────────────────
+  C4. CORE FEATURE: MARKETPLACE
+────────────────────────────────────────────────────────────────────────────────
+
+  C4.1 User Flow: ดูสรุป → ซื้อ → ใช้งาน
+  ─────────────────────────────────────────
+
+  Step 1: Discovery
+  User เห็นสรุปใน Explore Feed
+  แสดงข้อมูล:
+    - ชื่อสรุป
+    - วิชา / คณะ / มหาวิทยาลัย
+    - Rating (ดาว 1-5) + จำนวน Review
+    - ราคา (บาท หรือ Credit)
+    - Preview หน้าปก + หน้า 1-2
+
+  Step 2: Preview
+  User กด "ดูตัวอย่าง"
+  แสดง PDF Viewer แบบ:
+    - หน้า 1-2: เห็นชัดเจน
+    - หน้า 3+: Blur Effect หรือ Lock Overlay
+    - แสดงข้อความ "ซื้อเพื่อปลดล็อคทั้งหมด X บาท"
+
+  Step 3: Purchase
+  User กด "ซื้อเลย"
+  ถ้ามี Credit พอ → ยืนยัน 1 ครั้ง → จบ (ไม่ต้องกรอกอะไร)
+  ถ้า Credit ไม่พอ → แสดง Top-up Modal พร้อม PromptPay QR
+
+  Step 4: Post-Purchase (Backend)
+  - สร้าง Order Record
+  - Generate Watermark ID เฉพาะสำหรับ User × Item นี้
+  - ฝัง Watermark ลงไฟล์ PDF ใหม่ (ดูรายละเอียดใน PART E)
+  - ส่ง Signed URL ให้ User เข้าถึงไฟล์ที่ Watermark แล้ว
+
+  Step 5: Access
+  - เปิด PDF Viewer ใน App ได้ทันที
+  - ดาวน์โหลดได้ 3 ครั้ง (ต่อ Purchase)
+  - ไฟล์ที่ดาวน์โหลดมีชื่อ: [ชื่อสรุป]_[UserID_สั้น].pdf
+
+  C4.2 Marketplace Feed & Discovery
+  ────────────────────────────────────
+  Filter ที่ต้องมี:
+  - วิชา / Subject
+  - มหาวิทยาลัย / โรงเรียน
+  - ราคา (ฟรี / ≤50 / ≤100 / ทั้งหมด)
+  - Rating (4 ดาวขึ้นไป)
+  - เรียงตาม (ใหม่ล่าสุด / ขายดี / ราคาต่ำ-สูง)
+
+  Recommendation Algorithm (MVP):
+  - Based on User's declared subject (ตอน Onboarding)
+  - ใช้ Tag Matching ง่ายๆ ก่อน (ไม่ต้อง ML ตอน MVP)
+  - "คนที่ดูสรุปนี้ยังดู..." (Simple Co-occurrence)
+
+  C4.3 Creator Upload Flow
+  ──────────────────────────
+  Step 1: เลือกไฟล์ PDF ที่ต้องการขาย
+  Step 2: กรอกข้อมูล:
+    - ชื่อสรุป
+    - วิชา / คณะ / มหาวิทยาลัย
+    - ราคา (ตั้งเองได้ หรือแนะนำ 29 / 49 / 79 บาท)
+    - Preview Pages (เลือกว่าจะให้เห็นฟรีกี่หน้า ค่าเริ่มต้น: 2 หน้า)
+    - Tags
+  Step 3: Checkbox (Frictionless ToS):
+    [✓] ฉันยืนยันว่าเนื้อหานี้เป็นผลงานของฉันและไม่ละเมิดลิขสิทธิ์
+  Step 4: ระบบส่งไปสแกน AI Content Moderation (ใช้เวลา ~5-10 วินาที)
+  Step 5: ถ้าผ่าน → Publish ทันที
+           ถ้าไม่ผ่าน → แจ้งเหตุผล + ให้แก้ไขแล้ว Submit ใหม่
+
+  C4.4 Payment System
+  ─────────────────────
+  In-App Credit System:
+  - 1 Credit = 1 บาท
+  - เติม Credit ผ่าน:
+    1. PromptPay QR (สแกนใน App)
+    2. บัตรเครดิต / เดบิต (ผ่าน Omise)
+    3. แพ็กเกจเติม (100 / 300 / 500 Credit)
+  - แสดง Credit Balance ที่มุมบนขวาตลอดเวลา
+
+  GP Calculation:
+  ยอดขาย 100 บาท:
+    - GP ของแพลตฟอร์ม:  10-15 บาท (10-15%)
+    - VAT:               7 บาท
+    - Creator ได้รับ:    78-83 บาท
+  แสดงในหน้า Creator Dashboard อย่างโปร่งใส
+
+  Withdrawal:
+  - ขั้นต่ำ: 200 บาท
+  - ช่องทาง: PromptPay (กรอกเบอร์โทรหรือเลขบัตร)
+  - Processing Time: 1-3 วันทำการ
+
+  C4.5 Creator Dashboard
+  ────────────────────────
+  Overview Cards:
+  - ยอดขายรวม (เดือนนี้ vs เดือนที่แล้ว)
+  - จำนวน View / ซื้อ
+  - ยอดเงินที่รอถอน
+  - สรุปที่ขายดีที่สุด
+
+  Analytics Chart:
+  - Line Chart: ยอดขายรายวัน (7 วันล่าสุด)
+  - Bar Chart: สรุปแต่ละอันขายได้กี่ชิ้น
+
+  Item Management:
+  - แสดงสถานะ: Published / Under Review / Hidden (โดน Report)
+  - แก้ไข / ลบสรุปได้
+
+
+────────────────────────────────────────────────────────────────────────────────
+  C5. MOTIVATION & GAMIFICATION SYSTEM
+────────────────────────────────────────────────────────────────────────────────
+
+  Study Streak:
+  - นับวันที่ User เปิดแอปและสรุปอะไรก็ได้ ≥1 อย่าง
+  - แสดงเป็น Flame Icon + จำนวนวัน
+  - ถ้าขาด 1 วัน Streak จะหาย (กระตุ้นให้กลับมา)
+  - Push Notification เตือน 2 ชั่วโมงก่อนเที่ยงคืนถ้ายังไม่ได้เรียน
+
+  Goal Tracker:
+  - User ตั้งวันสอบได้
+  - แอปแสดง "เหลืออีก X วัน ถึงสอบ [ชื่อวิชา]"
+  - Progress Bar แสดงว่าเรียนไปแล้วกี่ % ของเนื้อหาที่ซื้อ
+
+  Leaderboard:
+  - รายสัปดาห์ (Reset ทุกจันทร์)
+  - นับจากเวลาที่ใช้เรียนในแอป (นาที)
+  - แสดง Top 10 + อันดับของ User เอง
+
+  Achievement Badges:
+  - "Rookie" — ใช้ AI สรุปครั้งแรก
+  - "Streak 7" — เรียน 7 วันติดต่อ
+  - "Quick Buyer" — ซื้อสรุปครั้งแรก
+  - "First Creator" — ขายสรุปได้ครั้งแรก
+  - "Quiz Master" — ทำ Quiz ผ่าน 10 ชุด
+
+
+================================================================================
+  PART D — DESIGN SYSTEM & UI GUIDE
+  สำหรับ Designer & Dev
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  D1. VISUAL IDENTITY — หลักการออกแบบ
+────────────────────────────────────────────────────────────────────────────────
+
+  Design Philosophy:
+  "Clean enough to focus, Lively enough to motivate"
+  สะอาดพอให้โฟกัส แต่มีชีวิตพอให้อยากเรียน
+
+  Reference Apps (ให้ดูและนำมาผสมกัน):
+  - Notion       → ความสะอาด, Typography, Whitespace
+  - GoodNotes    → Layout สำหรับ iPad, PDF Viewing Experience
+  - Quizlet      → Gamification, Color use, CTA Buttons
+  - Duolingo     → Streak System, Reward Feedback, Friendly Tone
+  - Linear       → Speed, Efficiency, Modern Minimal
+
+  แนวทางสรุป:
+  - พื้นที่ว่าง (Whitespace) คือเพื่อน ไม่ต้องยัดทุกอย่างลงหน้าจอ
+  - ลำดับชั้น (Hierarchy) ชัดเจน: อะไรสำคัญที่สุด ต้องใหญ่ที่สุด
+  - ไม่ใช้ Shadow หนัก ใช้ Subtle Border หรือ Light Background แทน
+  - Animation ต้องเร็ว (ไม่เกิน 300ms) ไม่ช้าจนรู้สึกหนัก
+
+
+────────────────────────────────────────────────────────────────────────────────
+  D2. COLOR SYSTEM
+────────────────────────────────────────────────────────────────────────────────
+
+  Light Mode:
+  ─────────────────────────────────────────────────────────────
+  Role              | Hex       | ใช้ที่ไหน
+  ─────────────────────────────────────────────────────────────
+  Primary           | #2563EB   | CTA Buttons, Active States, Links
+  Primary Light     | #DBEAFE   | Card Background, Tag Background
+  Secondary         | #F97316   | Streak, Badge, Alert, Highlight
+  Secondary Light   | #FED7AA   | Secondary Card Background
+  Background        | #FFFFFF   | หน้าจอหลัก
+  Surface           | #F8FAFC   | Card, Sheet, Panel
+  Surface 2         | #F1F5F9   | Input Background, Divider Area
+  Border            | #E2E8F0   | Card Border, Divider Line
+  Text Primary      | #0F172A   | Heading, Body Text
+  Text Secondary    | #64748B   | Subtitle, Placeholder, Caption
+  Text Disabled     | #CBD5E1   | Disabled State
+  Success           | #16A34A   | Purchase Success, Quiz Correct
+  Success Light     | #DCFCE7   | Success Banner Background
+  Error             | #DC2626   | Error State, Quiz Wrong
+  Error Light       | #FEE2E2   | Error Banner Background
+  ─────────────────────────────────────────────────────────────
+
+  Dark Mode (ใช้คู่กับ Light Mode):
+  ─────────────────────────────────────────────────────────────
+  Background        | #0F172A   | แทน #FFFFFF
+  Surface           | #1E293B   | แทน #F8FAFC
+  Surface 2         | #334155   | แทน #F1F5F9
+  Border            | #475569   | แทน #E2E8F0
+  Text Primary      | #F8FAFC   | แทน #0F172A
+  Text Secondary    | #94A3B8   | แทน #64748B
+  Primary ใช้เหมือนเดิม (Blue ยังคงอ่านได้ดีบน Dark Background)
+  ─────────────────────────────────────────────────────────────
+
+
+────────────────────────────────────────────────────────────────────────────────
+  D3. TYPOGRAPHY
+────────────────────────────────────────────────────────────────────────────────
+
+  Font Family:
+  - English / UI:  "Inter" (Google Fonts — ฟรี)
+  - Thai:          "Sarabun" (Google Fonts — ฟรี, อ่านง่ายบน Mobile)
+  - Code / Monospace: "JetBrains Mono" (สำหรับ Code Block ถ้ามี)
+
+  Type Scale:
+  ─────────────────────────────────────────────────────────────
+  Role          | Size   | Weight  | Line Height | ใช้ที่ไหน
+  ─────────────────────────────────────────────────────────────
+  Display       | 32px   | 700     | 1.2         | Onboarding Hero
+  H1            | 24px   | 700     | 1.3         | Page Title
+  H2            | 20px   | 600     | 1.4         | Section Header
+  H3            | 17px   | 600     | 1.4         | Card Title, Subtitle
+  Body Large    | 16px   | 400     | 1.6         | Main Content
+  Body          | 15px   | 400     | 1.6         | Secondary Content
+  Body Small    | 14px   | 400     | 1.5         | Caption, Metadata
+  Label         | 13px   | 500     | 1.4         | Tag, Badge, Button Label
+  Micro         | 11px   | 400     | 1.4         | Timestamp, Fine Print
+  ─────────────────────────────────────────────────────────────
+
+
+────────────────────────────────────────────────────────────────────────────────
+  D4. SPACING & LAYOUT SYSTEM
+────────────────────────────────────────────────────────────────────────────────
+
+  Base Unit: 4px (ทุก Spacing ต้องเป็นผลคูณของ 4)
+
+  Spacing Scale:
+  xs  = 4px
+  sm  = 8px
+  md  = 16px
+  lg  = 24px
+  xl  = 32px
+  2xl = 48px
+  3xl = 64px
+
+  Common Usage:
+  - Padding ภายใน Card:        16px (md)
+  - Gap ระหว่าง Cards:         12px (sm + xs)
+  - Horizontal Screen Margin:   16px (md) บนมือถือ / 24px บน iPad
+  - Section Spacing:            32px (xl)
+  - Bottom Safe Area:           Tab Bar Height + 8px
+
+  Border Radius:
+  - Button:       10px
+  - Card:         16px
+  - Input:        12px
+  - Modal:        20px
+  - Badge / Tag:  100px (Pill Shape)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  D5. COMPONENT SPECIFICATIONS
+────────────────────────────────────────────────────────────────────────────────
+
+  D5.1 Buttons
+  ─────────────
+  Primary Button:
+    Background: #2563EB | Text: White | Font: 15px/600
+    Padding: 14px 24px | Radius: 10px | Height: 48px
+    Pressed State: Darken 10% | Disabled: Opacity 40%
+
+  Secondary Button:
+    Background: #DBEAFE | Text: #2563EB | Border: none
+    ใช้สำหรับ: Secondary Actions ที่ไม่ต้องการให้ dominant
+
+  Ghost Button:
+    Background: Transparent | Text: #2563EB | Border: 1px #2563EB
+    ใช้สำหรับ: Cancel, Back, Less Important Actions
+
+  Danger Button:
+    Background: #DC2626 | Text: White
+    ใช้สำหรับ: Delete, Report Confirm
+
+  D5.2 Cards
+  ────────────
+  Summary Card (ใน Marketplace Feed):
+  ┌──────────────────────────────────────┐
+  │ [THUMBNAIL / COVER]                  │
+  │ 📚 [วิชา] · [มหาวิทยาลัย]           │
+  │ [ชื่อสรุป - H3]                      │
+  │ ★ 4.8 (120 reviews)                 │
+  │ [Creator Avatar] [Creator Name]      │
+  │                          [฿49] [ซื้อ]│
+  └──────────────────────────────────────┘
+
+  Border: 1px #E2E8F0 | Radius: 16px | Shadow: None
+  Padding: 16px | Background: White
+
+  D5.3 Inputs
+  ────────────
+  Height: 48px | Radius: 12px | Border: 1.5px #E2E8F0
+  Focus Border: 1.5px #2563EB | Background: #F8FAFC
+  Font: 16px (สำคัญ — ≥16px บน iOS เพื่อไม่ให้ Safari Zoom เข้ามา)
+
+  D5.4 Loading States
+  ─────────────────────
+  AI Processing Animation:
+  - ใช้ Lottie Animation หรือ Animated Illustration จาก Storyset
+  - ข้อความที่แสดงระหว่างรอ (เปลี่ยนทุก 2 วิ):
+    "กำลังอ่านเนื้อหา..."
+    "กำลังย่อยข้อมูล..."
+    "กำลังเรียบเรียงให้เข้าใจง่าย..."
+    "เกือบเสร็จแล้ว..."
+  - ห้ามแสดง Spinner วงกลมแบบ Default (ดูไม่ Premium)
+
+  Skeleton Loading:
+  - ใช้สำหรับ Feed / List ที่กำลังโหลด
+  - Animation: shimmer effect (ซ้ายไปขวา)
+
+
+================================================================================
+  PART E — LEGAL & COMPLIANCE ARCHITECTURE
+  สำหรับ Dev + Legal
+================================================================================
+
+  หลักการ: "รปภ. ที่ยืนดูอยู่ห่างๆ"
+  ทุก Feature ในส่วนนี้ต้องมี แต่ต้องไม่เกะกะ User
+  และต้องไม่ขัดจังหวะประสบการณ์การใช้งาน
+
+
+────────────────────────────────────────────────────────────────────────────────
+  E1. DIGITAL WATERMARKING
+────────────────────────────────────────────────────────────────────────────────
+
+  เป้าหมาย:
+  ทุกครั้งที่ User ซื้อหรือดาวน์โหลดสรุป ระบบต้องฝัง ID เฉพาะของ
+  ผู้ซื้อลงไปในไฟล์ PDF เพื่อใช้ตรวจสอบหากมีการนำไปปล่อยเถื่อน
+
+  วิธีทำ (เลือก 1 วิธี ตาม Complexity):
+
+  วิธีที่ 1: Metadata Embedding (ง่ายที่สุด สำหรับ MVP)
+  ─────────────────────────────────────────────────────
+  - ฝัง User ID ลงใน PDF Metadata (Field: "Author" หรือ Custom Field)
+  - ใช้ Library: python-pypdf หรือ pdf-lib (Node.js)
+  - ข้อเสีย: ลบออกได้ด้วย Metadata Cleaner
+
+  Code Pattern (Node.js + pdf-lib):
+  const { PDFDocument } = require('pdf-lib');
+  async function addWatermark(pdfBytes, userId, orderId) {
+    const doc = await PDFDocument.load(pdfBytes);
+    doc.setAuthor(`FiN-${userId}-${orderId}`);
+    doc.setKeywords([`wm:${userId}`, `order:${orderId}`]);
+    return await doc.save();
+  }
+
+  วิธีที่ 2: Visible Subtle Text Watermark (แนะนำ MVP)
+  ──────────────────────────────────────────────────────
+  - พิมพ์ข้อความ User ID / Email เล็กๆ มุมล่างขวาทุกหน้า
+  - ความโปร่งใส (Opacity): 15-20% สีเทาอ่อน
+  - ขนาด Font: 7-8px (เห็นแต่ไม่รบกวนการอ่าน)
+  - ข้อดี: มองเห็นได้ถ้าเอาไปโพสต์ในโซเชียล
+
+  วิธีที่ 3: Invisible Steganographic Watermark (สำหรับ V2)
+  ───────────────────────────────────────────────────────────
+  - ใช้ Library: imatag หรือ Digimarc API
+  - ฝัง Data ลงใน Pixel Pattern ของภาพที่ฝังใน PDF
+  - ข้อดี: ตรวจสอบได้แม้ถ่ายรูปหน้าจอ
+  - ข้อเสีย: ราคาสูง เหมาะกับ Scale ขึ้น
+
+  สำหรับ MVP: ใช้ทั้งวิธีที่ 1 และวิธีที่ 2 รวมกัน
+
+
+────────────────────────────────────────────────────────────────────────────────
+  E2. AI CONTENT MODERATION
+────────────────────────────────────────────────────────────────────────────────
+
+  เป้าหมาย:
+  ก่อนสรุปจะถูก Publish บน Marketplace ต้องผ่านการตรวจสอบอัตโนมัติ
+
+  Pipeline:
+  Step 1: Extract text จาก PDF ที่ Creator อัปโหลด
+  Step 2: ส่งให้ AI Model (GPT-4o-mini หรือ Perspective API)
+  Step 3: ตรวจสอบตาม Checklist:
+    - มีเนื้อหาลามกอนาจารหรือไม่?
+    - มี Hate Speech หรือไม่?
+    - มีข้อมูลส่วนบุคคลของผู้อื่น (เลขบัตร, เบอร์โทร) หรือไม่?
+    - มีการระบุชื่อเจ้าของลิขสิทธิ์ชัดเจนเกินไปหรือไม่?
+      (เช่น ระบุว่าคัดลอกมาจากหนังสือของใคร)
+  Step 4: Return Score (0-100) + Flag ที่พบ
+
+  Threshold:
+  - Score < 30: Publish อัตโนมัติ
+  - Score 30-70: ส่ง Admin Queue ให้ตรวจสอบ แต่ Publish ชั่วคราว
+  - Score > 70: Reject + แจ้ง Creator พร้อมเหตุผล
+
+  System Prompt สำหรับ Moderation:
+  ─────────────────────────────────
+  "คุณคือ Content Moderator ของแพลตฟอร์มการศึกษา
+   ตรวจสอบเนื้อหาต่อไปนี้และตอบกลับเป็น JSON เท่านั้น:
+   {
+     score: 0-100,    (0 = ปลอดภัย, 100 = อันตรายมาก)
+     flags: [],       (รายการปัญหาที่พบ)
+     reason: ""       (อธิบายสั้นๆ ถ้ามีปัญหา)
+   }
+   ตรวจสอบ: เนื้อหาลามก, Hate Speech, ข้อมูลส่วนตัว, การละเมิดลิขสิทธิ์อย่างชัดเจน"
+  ─────────────────────────────────
+
+
+────────────────────────────────────────────────────────────────────────────────
+  E3. REPORTING SYSTEM
+────────────────────────────────────────────────────────────────────────────────
+
+  ปุ่ม Report:
+  - อยู่ที่มุมบนขวาของทุก Summary Card และหน้า PDF Viewer
+  - Icon: Flag เล็กๆ สีเทา (เห็นแต่ไม่เกะกะ)
+  - เมื่อกด: Bottom Sheet ถามเหตุผล:
+    [ ] เนื้อหาไม่ถูกต้อง
+    [ ] ละเมิดลิขสิทธิ์
+    [ ] เนื้อหาไม่เหมาะสม
+    [ ] ราคาไม่ตรงกับที่โฆษณา
+    [ อื่นๆ ... ]
+
+  Auto-action Rules:
+  - Report ≥ 5 คน (ต่างกัน):         Hidden ชั่วคราว + ส่ง Admin Queue
+  - Report ≥ 10 คน:                   Hidden ถาวรจนกว่า Admin จะ Approve
+  - รายงานประเภท "ลามก" แม้แค่ 1 คน: ส่ง Admin Queue ทันที (Priority High)
+
+  Admin Dashboard (Minimal):
+  - ลิสต์รายการที่ถูก Report เรียงตาม Priority
+  - Approve (กลับมา Publish) / Remove (ลบถาวร) / Warn Creator
+
+
+────────────────────────────────────────────────────────────────────────────────
+  E4. TERMS OF SERVICE & FRICTIONLESS COMPLIANCE
+────────────────────────────────────────────────────────────────────────────────
+
+  Upload Agreement (ในหน้า Creator Upload):
+  ──────────────────────────────────────────
+  [✓] ฉันยืนยันว่า:
+      - เนื้อหานี้เป็นผลงานของฉันหรือได้รับอนุญาตให้เผยแพร่
+      - ไม่มีการคัดลอกเนื้อหาจากตำราเรียน/หนังสือโดยตรง
+      - ยอมรับเงื่อนไขการใช้งาน FiN Buddy
+
+  [ดูเงื่อนไขเต็ม] → เปิด Modal แสดง ToS ฉบับย่อ
+
+  ข้อสำคัญทาง Legal ที่ต้องมีใน ToS:
+  - แพลตฟอร์มไม่รับผิดชอบต่อเนื้อหาที่ Creator อัปโหลด
+  - Creator รับรองว่าตัวเองเป็นเจ้าของหรือมีสิทธิ์เผยแพร่
+  - แพลตฟอร์มสงวนสิทธิ์ในการลบเนื้อหาที่ละเมิด ToS โดยไม่ต้องแจ้งล่วงหน้า
+  - Digital Watermark ถูกฝังทุก Purchase เพื่อการตรวจสอบ
+
+  ข้อแนะนำเพิ่มเติม:
+  - ควรให้ทนายความตรวจ ToS ก่อน Launch จริง
+  - ลงทะเบียนบริษัทก่อน เพื่อรับผิดในนามนิติบุคคล ไม่ใช่บุคคลธรรมดา
+
+
+================================================================================
+  PART F — TECHNICAL ARCHITECTURE
+  สำหรับ Dev
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  F1. SYSTEM ARCHITECTURE OVERVIEW
+────────────────────────────────────────────────────────────────────────────────
+
+  [Mobile App (React Native)]
+        │
+        ▼
+  [API Gateway / Load Balancer]
+        │
+        ├──► [Auth Service]          → Firebase Auth / Supabase
+        ├──► [User Service]          → Profile, Credits, Goals
+        ├──► [AI Service]            → Upload, Parse, Summarize
+        ├──► [Marketplace Service]   → Items, Orders, Payments
+        ├──► [Creator Service]       → Dashboard, Earnings
+        ├──► [Notification Service]  → Push, Email
+        └──► [Moderation Service]    → Content Filter, Reports
+              │
+              ▼
+        [PostgreSQL]  [Redis Cache]  [AWS S3 / R2]
+
+
+────────────────────────────────────────────────────────────────────────────────
+  F2. DATABASE SCHEMA
+────────────────────────────────────────────────────────────────────────────────
+
+  Table: users
+  ─────────────────────────────────────────────────────────────
+  Column              | Type          | Notes
+  ─────────────────────────────────────────────────────────────
+  id                  | UUID (PK)     |
+  email               | VARCHAR(255)  | UNIQUE
+  display_name        | VARCHAR(100)  |
+  avatar_url          | TEXT          |
+  credit_balance      | INTEGER       | หน่วยเป็น สตางค์ (100 = 1 บาท)
+  streak_days         | INTEGER       | DEFAULT 0
+  last_active_date    | DATE          |
+  exam_goal           | VARCHAR(200)  |
+  exam_date           | DATE          |
+  is_creator          | BOOLEAN       | DEFAULT false
+  created_at          | TIMESTAMPTZ   |
+  ─────────────────────────────────────────────────────────────
+
+  Table: marketplace_items
+  ─────────────────────────────────────────────────────────────
+  Column              | Type          | Notes
+  ─────────────────────────────────────────────────────────────
+  id                  | UUID (PK)     |
+  creator_id          | UUID (FK)     | → users.id
+  title               | VARCHAR(255)  |
+  subject             | VARCHAR(100)  |
+  university          | VARCHAR(200)  |
+  description         | TEXT          |
+  price_satang        | INTEGER       | ราคาเป็น สตางค์
+  original_file_key   | TEXT          | S3 Key ไฟล์ต้นฉบับ
+  preview_pages       | INTEGER       | DEFAULT 2
+  thumbnail_url       | TEXT          |
+  tags                | TEXT[]        |
+  status              | ENUM          | draft/pending/published/hidden/removed
+  total_sold          | INTEGER       | DEFAULT 0
+  total_revenue       | INTEGER       | DEFAULT 0 (สตางค์)
+  ai_moderation_score | INTEGER       |
+  created_at          | TIMESTAMPTZ   |
+  ─────────────────────────────────────────────────────────────
+
+  Table: orders
+  ─────────────────────────────────────────────────────────────
+  Column              | Type          | Notes
+  ─────────────────────────────────────────────────────────────
+  id                  | UUID (PK)     |
+  buyer_id            | UUID (FK)     | → users.id
+  item_id             | UUID (FK)     | → marketplace_items.id
+  paid_satang         | INTEGER       |
+  gp_satang           | INTEGER       | แพลตฟอร์มได้รับ
+  creator_satang      | INTEGER       | Creator ได้รับ
+  watermark_id        | VARCHAR(64)   | Unique per order
+  watermarked_file_key| TEXT          | S3 Key ไฟล์ที่ฝัง Watermark แล้ว
+  download_count      | INTEGER       | DEFAULT 0, MAX 3
+  created_at          | TIMESTAMPTZ   |
+  ─────────────────────────────────────────────────────────────
+
+  Table: ai_interactions
+  ─────────────────────────────────────────────────────────────
+  Column              | Type          | Notes
+  ─────────────────────────────────────────────────────────────
+  id                  | UUID (PK)     |
+  user_id             | UUID (FK)     |
+  input_type          | ENUM          | pdf/image/text
+  input_file_key      | TEXT          | S3 Key (ถ้ามี)
+  token_input         | INTEGER       |
+  token_output        | INTEGER       |
+  ai_model            | VARCHAR(50)   | กัน gpt-4o-mini
+  duration_ms         | INTEGER       |
+  created_at          | TIMESTAMPTZ   |
+  ─────────────────────────────────────────────────────────────
+
+  Table: reports
+  ─────────────────────────────────────────────────────────────
+  Column              | Type          | Notes
+  ─────────────────────────────────────────────────────────────
+  id                  | UUID (PK)     |
+  reporter_id         | UUID (FK)     |
+  item_id             | UUID (FK)     |
+  reason              | ENUM          | incorrect/copyright/inappropriate/other
+  detail              | TEXT          |
+  status              | ENUM          | pending/reviewed/resolved
+  auto_hidden_at      | TIMESTAMPTZ   | NULL ถ้ายังไม่โดน Auto-hide
+  created_at          | TIMESTAMPTZ   |
+  ─────────────────────────────────────────────────────────────
+
+  Table: credit_transactions
+  ─────────────────────────────────────────────────────────────
+  Column              | Type          | Notes
+  ─────────────────────────────────────────────────────────────
+  id                  | UUID (PK)     |
+  user_id             | UUID (FK)     |
+  type                | ENUM          | topup/purchase/withdrawal/refund
+  amount_satang       | INTEGER       | บวก=เข้า ลบ=ออก
+  balance_after       | INTEGER       |
+  reference_id        | UUID          | order_id หรือ payment_id
+  note                | TEXT          |
+  created_at          | TIMESTAMPTZ   |
+  ─────────────────────────────────────────────────────────────
+
+
+────────────────────────────────────────────────────────────────────────────────
+  F3. API ENDPOINTS
+────────────────────────────────────────────────────────────────────────────────
+
+  Auth:
+  POST   /auth/google         → Sign in with Google
+  POST   /auth/apple          → Sign in with Apple
+  POST   /auth/refresh        → Refresh token
+  DELETE /auth/logout         → Logout
+
+  User:
+  GET    /user/me             → Get current user profile
+  PATCH  /user/me             → Update profile, goal, exam_date
+  GET    /user/me/credits     → Get credit balance + transactions
+
+  AI:
+  POST   /ai/summarize        → Upload file → get AI summary (Streaming)
+  POST   /ai/quiz             → Generate quiz from summary text
+  POST   /ai/flashcards       → Generate flashcards from summary text
+
+  Marketplace:
+  GET    /marketplace/items   → List items (with filters + pagination)
+  GET    /marketplace/items/:id → Get item detail + preview URL
+  POST   /marketplace/orders  → Purchase item (deduct credit)
+  GET    /marketplace/orders  → Get user's purchase history
+  GET    /marketplace/orders/:id/download → Get Signed Download URL
+
+  Creator:
+  POST   /creator/items       → Upload new item
+  PATCH  /creator/items/:id   → Edit item
+  DELETE /creator/items/:id   → Remove item
+  GET    /creator/dashboard   → Analytics overview
+  POST   /creator/withdraw    → Request withdrawal
+
+  Reports:
+  POST   /reports             → Submit report
+  GET    /admin/reports       → Admin: get report queue
+  PATCH  /admin/reports/:id   → Admin: approve/remove
+
+  Payments (Webhook):
+  POST   /webhooks/omise      → Receive payment confirmation from Omise
+
+
+────────────────────────────────────────────────────────────────────────────────
+  F4. API SECURITY
+────────────────────────────────────────────────────────────────────────────────
+
+  Authentication:
+  - ทุก Endpoint (ยกเว้น Auth) ต้องมี JWT Bearer Token
+  - Token Expiry: Access Token 15 นาที / Refresh Token 30 วัน
+
+  Rate Limiting:
+  - /ai/summarize:            5 requests/min ต่อ user
+  - /marketplace/items (GET): 60 requests/min ต่อ IP
+  - /auth/*:                  10 requests/min ต่อ IP
+
+  File Security:
+  - ไฟล์ PDF ทุกอันเก็บใน Private S3 Bucket
+  - ไม่มี Public URL เด็ดขาด
+  - ใช้ Signed URL เท่านั้น (Expiry: 1 ชั่วโมง)
+  - ทุกครั้งที่ Generate Signed URL ต้องตรวจสอบว่า User เป็นเจ้าของ Order นั้น
+
+  Content Protection:
+  - Disable Text Selection ใน PDF Viewer ที่แสดงเนื้อหาที่ซื้อ
+    (ใช้ CSS: user-select: none + preventDefault ใน onCopy event)
+  - ไม่เปิด External Link ออกจาก App โดยตรง (ป้องกัน Phishing)
+
+  Input Validation:
+  - ตรวจสอบ File Type จาก Magic Bytes ไม่ใช่แค่ Extension
+  - จำกัดขนาดไฟล์: PDF ≤ 50MB / รูปภาพ ≤ 10MB
+  - Sanitize ทุก Text Input ก่อน Query Database
+
+
+================================================================================
+  PART G — DESIGN RESOURCES & AI PROMPTS
+  สำหรับ Designer & Dev ที่ใช้ AI ช่วยสร้าง UI
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  G1. APP NAMING GUIDE
+────────────────────────────────────────────────────────────────────────────────
+
+  ชื่อแนะนำ: FiN Buddy
+  เหตุผล:
+  - "FiN" → ย่อมาจาก Finance + Note / หรือแค่ฟังดูดี ทันสมัย
+  - "Buddy" → ให้ความรู้สึกเป็นเพื่อน ไม่กดดัน เข้าถึงง่าย
+  - ออกเสียงง่าย จำง่าย ทำ SEO ง่าย
+
+  ตัวเลือกสำรอง:
+  BrainSync, NoteGenie, AI-Cade (Vibe: ฉลาด/เทคโนโลยี)
+  SwiftNote, ZapStudy, ReadIn5  (Vibe: เร็ว/ประหยัดเวลา)
+
+  สำหรับ Logo:
+  - ใช้ตัว "F" สไตล์ Minimal + Spark/Brain/Book Icon ผสมกัน
+  - สีหลัก: Electric Blue (#2563EB)
+  - Font: Inter Bold หรือ Plus Jakarta Sans
+
+
+────────────────────────────────────────────────────────────────────────────────
+  G2. REFERENCE SITES — แหล่งดู UI/UX
+────────────────────────────────────────────────────────────────────────────────
+
+  Mobbin (mobbin.com) — ดูที่นี่ก่อน
+  ─────────────────────────────────
+  ค้นหา App เหล่านี้เพื่อดู Flow:
+  - "Notion" → ดู Typography, Hierarchy, Empty States
+  - "Quizlet" → ดู Gamification, Card Layout, Quiz Flow
+  - "GoodNotes" → ดู iPad Split View, PDF Viewer, Toolbar
+  - "Duolingo" → ดู Streak, Onboarding, Reward Animation
+  - "Gumroad" → ดู Marketplace Layout, Creator Dashboard
+
+  Dribbble (dribbble.com) — ดู Visual Design
+  ──────────────────────────────────────────
+  Keywords ที่ควรค้นหา:
+  - "edtech app UI 2024"
+  - "AI study app dashboard"
+  - "iPad split view app design"
+  - "student marketplace mobile"
+  - "e-learning dark mode UI"
+
+  Behance (behance.net) — ดู Case Studies
+  ────────────────────────────────────────
+  Keywords:
+  - "education app UX case study"
+  - "PDF reader app redesign"
+  - "note-taking app UI kit"
+
+  Pinterest (pinterest.com) — ทำ Moodboard
+  ─────────────────────────────────────────
+  Keywords:
+  - "studygram aesthetic UI"
+  - "minimalist student app iOS"
+  - "iOS widget study aesthetic"
+  - "clean note app screenshot"
+
+
+────────────────────────────────────────────────────────────────────────────────
+  G3. FREE ASSETS — ใช้ได้เลย ไม่ต้องวาดเอง
+────────────────────────────────────────────────────────────────────────────────
+
+  Icons:
+  ─────
+  Lucide Icons (lucide.dev)
+  - ฟรี Open Source
+  - Clean, Modern, Consistent
+  - รองรับ React / React Native / Flutter
+  - แนะนำสำหรับแอปนี้
+
+  Phosphor Icons (phosphoricons.com)
+  - ฟรี Open Source
+  - มีหลาย Weight (Thin, Light, Regular, Bold, Fill, Duotone)
+  - ให้ความรู้สึก Premium กว่า Default Icons
+
+  Illustrations:
+  ──────────────
+  unDraw (undraw.co)
+  - Vector Illustrations ฟรี
+  - สามารถเปลี่ยนสีหลักให้ตรงกับ Brand Color ได้ทันที
+  - ใช้ในหน้า: Empty State, Onboarding, Success Screen
+
+  Storyset (storyset.com)
+  - Animated Illustrations ฟรี
+  - Export เป็น Lottie JSON ได้
+  - ใช้ในหน้า: AI Loading, Onboarding, Achievement Unlock
+
+  Fonts:
+  ──────
+  Google Fonts (fonts.google.com) — ฟรีทั้งหมด
+  - Inter: UI Font หลัก
+  - Sarabun: Thai Text
+  - JetBrains Mono: Code (ถ้าจำเป็น)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  G4. AI PROMPTS — พร้อมใช้งาน
+────────────────────────────────────────────────────────────────────────────────
+
+  Prompt สำหรับสร้าง App Icon:
+  (ใช้กับ Midjourney, DALL-E 3, Adobe Firefly, Canva AI)
+  ──────────────────────────────────────────────────────────────────────────
+  "A minimalist iOS app icon for an AI-powered study platform called
+   'FiN Buddy'. The icon features a simple glowing book combined with
+   a small electric spark or brain symbol representing AI.
+   Modern flat design, vibrant electric blue (#2563EB) as the main color
+   with a clean white background. No text, no shadows, UI/UX style,
+   App Store ready, 1024x1024px aspect ratio."
+  ──────────────────────────────────────────────────────────────────────────
+
+  Prompt สำหรับ Dev: สร้าง Home Screen (React Native)
+  ──────────────────────────────────────────────────────────────────────────
+  "Act as a senior React Native UI developer.
+   Create the Home screen for an iPad app called 'FiN Buddy'.
+
+   Requirements:
+   - Split view layout: Left panel (320px) shows uploaded file list,
+     Right panel shows AI-generated summary with streaming text
+   - Color scheme: White background, #F8FAFC card background,
+     #2563EB primary blue, #F97316 accent orange
+   - Header shows: App logo + 'Good morning, [Name]'
+     + Study Streak counter (flame icon + days)
+   - Left panel: Search bar + list of PDF files with thumbnail,
+     subject tag, and relative date
+   - Right panel: Full-screen AI summary with markdown rendering,
+     bottom action bar with 3 buttons: Generate Quiz / Flashcards / Save
+   - Use Lucide React Native icons
+   - Include TypeScript types
+   - Follow React Native best practices for iPad (adaptive layout)"
+  ──────────────────────────────────────────────────────────────────────────
+
+  Prompt สำหรับ Designer: สร้าง Marketplace Feed
+  ──────────────────────────────────────────────────────────────────────────
+  "Design a mobile marketplace feed screen for a Thai EdTech app.
+   Show study summary cards in a 2-column grid layout.
+   Each card has: cover thumbnail, subject tag (pill shape),
+   title (2 lines max), star rating, creator avatar + name,
+   and price button.
+   Style: Clean white cards, subtle #E2E8F0 border, 16px radius,
+   no heavy shadows, energetic blue CTA button.
+   Include a filter chip row at the top (All / Free / Under 50฿ / Top Rated)
+   and a search bar.
+   Design for iPhone 14 Pro screen size (393x852px)."
+  ──────────────────────────────────────────────────────────────────────────
+
+  Prompt สำหรับ Creator Dashboard:
+  ──────────────────────────────────────────────────────────────────────────
+  "Design a creator earnings dashboard for a mobile app.
+   Show: Total earnings this month (large number, blue),
+   comparison with last month (green up arrow or red down arrow),
+   a simple line chart of daily sales for the past 7 days,
+   a list of top-selling items with thumbnail and sales count,
+   and a 'Withdraw' button at the bottom.
+   Clean, minimal design. Use green for positive numbers,
+   red for negative. No heavy gradients."
+  ──────────────────────────────────────────────────────────────────────────
+
+
+================================================================================
+  PART H — MVP ROADMAP & PRIORITY
+  สำหรับทุกทีม
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  H1. MENTAL MODEL — ภาพรวมที่ทุกทีมต้องจำ
+────────────────────────────────────────────────────────────────────────────────
+
+  🤖 AI + 🛒 Marketplace = พระเอก     → Build ก่อน ใส่ใจมากที่สุด
+  📱 iPad UX + Design    = เวที       → ทำให้ User รู้สึก Premium
+  🔒 Legal System        = รปภ.       → ต้องมี แต่ซ่อนไว้หลังบ้าน
+
+
+────────────────────────────────────────────────────────────────────────────────
+  H2. FEATURE PRIORITY LIST
+────────────────────────────────────────────────────────────────────────────────
+
+  P0 — Must Have (Week 1-2):
+  ─────────────────────────
+  [✓] Google Sign-In
+  [✓] PDF Upload + AI Summarize (Streaming)
+  [✓] Quiz Generator จาก Summary
+  [✓] Marketplace Feed (ดูสรุป + Preview)
+  [✓] Purchase Flow (Credit System + Omise PromptPay)
+  [✓] Basic Creator Upload
+  [✓] Digital Watermark (เบื้องต้น)
+  [✓] iPad Split View Layout
+
+  P1 — Should Have (Week 2-3):
+  ─────────────────────────────
+  [ ] Flashcard Generator
+  [ ] Study Streak System
+  [ ] Push Notification (Streak Reminder)
+  [ ] Creator Dashboard (Analytics)
+  [ ] Reporting System
+  [ ] Dark Mode
+  [ ] OCR (Image Upload)
+
+  P2 — Nice to Have (Week 3-4 / Post-MVP):
+  ─────────────────────────────────────────
+  [ ] Leaderboard
+  [ ] Achievement Badges
+  [ ] Advanced Recommendation Algorithm
+  [ ] Apple Sign-In
+  [ ] Withdrawal System
+  [ ] Admin Panel
+
+
+────────────────────────────────────────────────────────────────────────────────
+  H3. NON-NEGOTIABLE QUALITY STANDARDS
+────────────────────────────────────────────────────────────────────────────────
+
+  Performance:
+  - AI Summary เริ่มแสดง Token แรกภายใน 3 วินาที
+  - หน้า Feed โหลดภายใน 1.5 วินาที (Cached)
+  - PDF Viewer เปิดได้ภายใน 2 วินาที
+
+  Reliability:
+  - Payment Flow ต้องไม่ Error ไม่ว่ากรณีใดก็ตาม
+  - ถ้า AI Error ต้องแสดง Error State ชัดเจน พร้อมปุ่ม "ลองอีกครั้ง"
+  - ถ้า Upload ล้มเหลว ต้องคืน Credit ทันที (Rollback)
+
+  UX Standards:
+  - Touch Target ทุกปุ่มต้องไม่น้อยกว่า 44x44px
+  - Font Size ใน Input ต้องไม่น้อยกว่า 16px (iOS Safari zoom rule)
+  - Loading State ทุก Async Action ต้องมี Skeleton หรือ Spinner
+  - Empty State ทุกหน้าต้องมี Illustration + ข้อความ + CTA
+
+
+────────────────────────────────────────────────────────────────────────────────
+  H4. DEFINITION OF DONE (MVP)
+────────────────────────────────────────────────────────────────────────────────
+
+  MVP ถือว่าเสร็จเมื่อ:
+  1. User สามารถ Sign In → Upload PDF → ได้ AI Summary ที่อ่านรู้เรื่อง
+  2. User สามารถ Browse Marketplace → Preview → ซื้อด้วย Credit
+  3. Creator สามารถ Upload สรุป → ระบบ Moderate → Publish
+  4. ทุก PDF ที่ซื้อมี Watermark ของผู้ซื้อ
+  5. แอปทำงานได้ดีบน iPhone, Android, และ iPad
+  6. ไม่มี Critical Bug ใดๆ ในส่วน Payment Flow
+
+
+================================================================================
+  END OF DOCUMENT
+  FiN Buddy PRD v1.0  |  Confidential  |  เมษายน 2026
+================================================================================

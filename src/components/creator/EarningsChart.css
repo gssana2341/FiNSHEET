@@ -1,0 +1,76 @@
+.earnings-chart {
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.earnings-chart-title {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-lg);
+  color: var(--color-text-primary);
+}
+
+.earnings-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-md);
+  height: 200px;
+}
+
+.earnings-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  height: 100%;
+}
+
+.earnings-bar-wrapper {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.earnings-bar {
+  width: 100%;
+  max-width: 48px;
+  background: var(--gradient-hero);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  position: relative;
+  transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 4px;
+  cursor: pointer;
+}
+
+.earnings-bar:hover {
+  filter: brightness(1.1);
+  box-shadow: var(--shadow-warm);
+}
+
+.earnings-bar-value {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.earnings-bar:hover .earnings-bar-value {
+  opacity: 1;
+}
+
+.earnings-bar-label {
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+}
