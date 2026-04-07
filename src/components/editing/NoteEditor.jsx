@@ -1,273 +1,285 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  X, Pen, Highlighter, Eraser, Type, Sparkles, 
-  ChevronLeft, ChevronRight, Save, Share2, 
-  Settings, Layers, MousePointer2, Shapes, Image as ImageIcon, 
-  LassoSelect, Ruler, Mic, Search, MoreHorizontal, Maximize2, 
-  Minimize2, Monitor, Layout, FileText, CheckCircle2, Copy, GripVertical
+  X, ChevronLeft, Layout, Sparkles, Plus, 
+  Pen, Eraser, MousePointer2, Highlighter, 
+  GripVertical, Target, Maximize2, CheckCircle2,
+  Type, Square, Circle, Minus, MousePointer, 
+  ChevronDown, Trash2, Eraser as EraserIcon
 } from 'lucide-react';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import FabricPage from './FabricPage';
 import './NoteEditor.css';
 
-export default function NoteEditor({ item, onClose, isTablet = true }) {
+export default function NoteEditor({ item, onClose }) {
+  // --- Tool System State ---
   const [activeTool, setActiveTool] = useState('pen');
-  const [penColor, setPenColor] = useState('#EF4444');
-  const [penSize, setPenSize] = useState(2);
-  const [showAiPanel, setShowAiPanel] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages] = useState(5);
-  const [toast, setToast] = useState(null);
+  const [brushColor, setBrushColor] = useState('#000000');
+  const [brushSize, setBrushSize] = useState(2);
+  const [eraserType, setEraserType] = useState('partial'); // 'partial' | 'object'
+  const [activeSubMenu, setActiveSubMenu] = useState(null); 
   
-  // Draggable Palette State
-  const [palettePos, setPalettePos] = useState({ x: window.innerWidth - 80, y: 150 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef(null);
-  const offsetRef = useRef({ x: 0, y: 0 });
+  // --- UI & Navigation State ---
+  const [showAiPanel, setShowAiPanel] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [paperStyle, setPaperStyle] = useState('ruled'); 
+  const [pages, setPages] = useState([1, 2, 3]); 
+  const [navMode, setNavMode] = useState('centered'); 
+  const [currentScale, setCurrentScale] = useState(1);
+  const [penOnlyMode, setPenOnlyMode] = useState(true); // Default to iPad optimized
+  
+  // Refs
+  const transformRef = useRef(null);
+  const pageRefs = useRef({});
+  const isTablet = window.innerWidth >= 768;
 
-  // Mock Toast system
-  const showToast = (message, icon = <CheckCircle2 size={16} />) => {
+  const showToast = (message, icon) => {
     setToast({ message, icon });
-    setTimeout(() => setToast(null), 3000);
+    setTimeout(() => setToast(null), 2000);
   };
 
-  const handleNext = (e) => {
-    e.stopPropagation();
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  const addPage = () => {
+    const newPage = pages.length + 1;
+    setPages([...pages, newPage]);
+    showToast(`Added Page ${newPage}`, <Plus size={16}/>);
   };
 
-  const handlePrev = (e) => {
-    e.stopPropagation();
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  // --- DRAG HANDLERS ---
-  const onDragStart = (e) => {
-    setIsDragging(true);
-    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-    
-    offsetRef.current = {
-      x: clientX - palettePos.x,
-      y: clientY - palettePos.y
-    };
-    
-    // Prevent text selection while dragging
-    document.body.style.userSelect = 'none';
-  };
-
-  const onDragMove = (e) => {
-    if (!isDragging) return;
-    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-
-    let newX = clientX - offsetRef.current.x;
-    let newY = clientY - offsetRef.current.y;
-
-    // Boundaries
-    const maxX = window.innerWidth - 60;
-    const maxY = window.innerHeight - 250;
-    newX = Math.max(10, Math.min(newX, maxX));
-    newY = Math.max(60, Math.min(newY, maxY));
-
-    setPalettePos({ x: newX, y: newY });
-  };
-
-  const onDragEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    document.body.style.userSelect = 'auto';
-
-    // Edge Snapping Logic (Left or Right)
-    const midX = window.innerWidth / 2;
-    if (palettePos.x < midX) {
-      setPalettePos(prev => ({ ...prev, x: 20 }));
-    } else {
-      setPalettePos(prev => ({ ...prev, x: window.innerWidth - 80 }));
+  const recenter = React.useCallback(() => {
+    if (transformRef.current) {
+      const { setTransform, instance } = transformRef.current;
+      const { positionY, scale } = instance.transformState;
+      const wrapper = document.querySelector('.react-transform-wrapper');
+      const content = document.querySelector('.react-transform-component');
+      if (wrapper && content) {
+        const targetX = (wrapper.offsetWidth - content.offsetWidth * scale) / 2;
+        setTransform(targetX, positionY, scale, 500);
+        showToast("Centered", <CheckCircle2 size={16}/>);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', onDragMove);
-      window.addEventListener('mouseup', onDragEnd);
-      window.addEventListener('touchmove', onDragMove, { passive: false });
-      window.addEventListener('touchend', onDragEnd);
+    if (navMode === 'centered') {
+      const timer = setTimeout(recenter, 50); 
+      return () => clearTimeout(timer);
     }
-    return () => {
-      window.removeEventListener('mousemove', onDragMove);
-      window.removeEventListener('mouseup', onDragEnd);
-      window.removeEventListener('touchmove', onDragMove);
-      window.removeEventListener('touchend', onDragEnd);
-    };
-  }, [isDragging, palettePos]);
+  }, [navMode, recenter]);
 
-  const shelfTools = [
-    { id: 'select', icon: MousePointer2, label: 'Select' },
-    { id: 'pen', icon: Pen, label: 'Pen' },
-    { id: 'highlighter', icon: Highlighter, label: 'Highlighter' },
-    { id: 'eraser', icon: Eraser, label: 'Eraser' },
-    { id: 'lasso', icon: LassoSelect, label: 'Lasso' },
-    { id: 'shapes', icon: Shapes, label: 'Shapes' },
-    { id: 'images', icon: ImageIcon, label: 'Images' },
-    { id: 'text', icon: Type, label: 'Text' },
-    { id: 'ruler', icon: Ruler, label: 'Ruler' },
+  // --- Toolbar Config ---
+  const mainTools = [
+    { id: 'lasso', icon: MousePointer, label: 'Lasso', sub: false },
+    { id: 'pen', icon: Pen, label: 'Pen', sub: true },
+    { id: 'highlighter', icon: Highlighter, label: 'Highlighter', sub: false },
+    { id: 'eraser', icon: Eraser, label: 'Eraser', sub: true },
+    { id: 'text', icon: Type, label: 'Text', sub: false },
+    { id: 'shape', icon: Square, label: 'Shapes', sub: true },
   ];
 
-  const colors = ['#000000', '#EF4444', '#22C55E', '#A855F7', '#3B82F6', '#F97316'];
-  const sizes = [1, 2, 4, 8];
+  const handleToolClick = (toolId, hasSub) => {
+    if (activeTool === toolId && hasSub) {
+      setActiveSubMenu(activeSubMenu === toolId ? null : toolId);
+    } else {
+      setActiveTool(toolId);
+      setActiveSubMenu(hasSub ? toolId : null);
+    }
+  };
+
+  const handleSavePage = (pageNumber, json) => {
+    localStorage.setItem(`note_data_fabric_${item.id}_${pageNumber}`, json);
+  };
 
   return (
-    <div className={`note-editor pro-editor-light ${isTablet ? 'tablet-view' : 'mobile-view'}`}>
-      {/* --- UNIFIED TOP BAR --- */}
-      <header className="light-header-unified">
-        <div className="header-left">
-          <button className="light-icon-btn" onClick={onClose} title="Back">
-            <ChevronLeft size={20} />
-          </button>
-        </div>
-        
-        <div className="header-center">
-          <div className="tools-pill-light">
-            {shelfTools.map(tool => {
-              const Icon = tool.icon;
-              return (
+    <div className={`note-editor zen-mode ${isTablet ? 'tablet-view' : 'mobile-view'}`}>
+      {/* 🚀 PROFESSIONAL TOOLBAR */}
+      <div className="pro-floating-toolbar animate-slide-down">
+        <div className="toolbar-inner">
+          <button className="tb-back-btn" onClick={onClose}><ChevronLeft size={20}/></button>
+          <div className="tb-divider" />
+          
+          <div className="tb-tools-group">
+            {mainTools.map(tool => (
+              <div key={tool.id} className="tb-tool-wrapper">
                 <button 
-                  key={tool.id}
-                  className={`tool-pill-item ${activeTool === tool.id ? 'active' : ''}`}
-                  onClick={() => setActiveTool(tool.id)}
-                  title={tool.label}
+                  className={`tb-tool-btn ${activeTool === tool.id ? 'active' : ''}`} 
+                  onClick={() => handleToolClick(tool.id, tool.sub)}
                 >
-                  <Icon size={18} />
-                  {activeTool === tool.id && <div className="active-dot-accent" />}
+                  <tool.icon size={20} />
+                  {tool.sub && <ChevronDown size={10} className="sub-indicator" />}
                 </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="header-right">
-          <button className="light-nav-btn" onClick={() => showToast("Searching document...", <Search size={16}/>)}><Search size={18} /></button>
-          <button 
-            className={`ai-pill-btn ${showAiPanel ? 'active' : ''}`}
-            onClick={() => {
-               setShowAiPanel(!showAiPanel);
-               if(!showAiPanel) showToast("AI Tutor is ready!", <Sparkles size={16} />);
-            }}
-          >
-            <Sparkles size={16} />
-          </button>
-          <div className="header-v-divider" />
-          <button className="light-nav-btn" onClick={() => showToast("Share link copied!", <Copy size={16}/>)}><Share2 size={18} /></button>
-          <button className="light-nav-btn" onClick={() => showToast("Saving document...")}><Save size={18} /></button>
-          <button className="light-nav-btn"><MoreHorizontal size={18} /></button>
-        </div>
-      </header>
-
-      {/* --- DRAGGABLE SIDE PALETTE --- */}
-      <aside 
-        className={`side-palette-light ${isDragging ? 'is-dragging' : ''}`}
-        style={{ left: palettePos.x, top: palettePos.y }}
-      >
-        <div className="drag-handle" onMouseDown={onDragStart} onTouchStart={onDragStart}>
-          <GripVertical size={16} color="#94a3b8" />
-        </div>
-        <div className="palette-group colors">
-          {colors.map(color => (
-            <button 
-              key={color}
-              className={`color-pick-dot ${penColor === color ? 'active' : ''}`}
-              style={{ backgroundColor: color }}
-              onClick={() => setPenColor(color)}
-            />
-          ))}
-        </div>
-        <div className="palette-divider-h" />
-        <div className="palette-group sizes">
-          {sizes.map(size => (
-            <button 
-              key={size}
-              className={`size-pick-btn ${penSize === size ? 'active' : ''}`}
-              onClick={() => setPenSize(size)}
-            >
-              <div className="size-marker" style={{ height: size + 2, width: size + 2 }} />
-            </button>
-          ))}
-        </div>
-      </aside>
-
-      {/* --- WORKSPACE --- */}
-      <main className="workspace-light">
-        <div className="workspace-canvas-area">
-           <div className="floating-page-sheet animate-fade-in" key={currentPage}>
-             <div className="page-padding">
-                {item.coverUrl && currentPage === 1 ? (
-                  <img src={item.coverUrl} className="content-raw-image" alt="content" />
-                ) : (
-                  <div className="page-mock-content">
-                    <h2 className="mock-h2">Page {currentPage}: {item.title}</h2>
-                    <p className="mock-p">{item.subject} • Note {currentPage}</p>
-                    <div className="mock-lines-group">
-                       {[...Array(12)].map((_, i) => (
-                         <div key={i} className="mock-line-item" style={{ width: `${Math.random() * 30 + 70}%` }} />
-                       ))}
+                
+                {/* PEN SUB MENU */}
+                {activeSubMenu === tool.id && tool.id === 'pen' && (
+                  <div className="tb-sub-menu animate-pop-in">
+                    <div className="sub-menu-section">
+                      <span className="sub-label">Size</span>
+                      <div className="size-presets">
+                        {[2, 4, 8, 12].map(s => (
+                          <button key={s} className={`size-dot ${brushSize === s ? 'active' : ''}`} onClick={() => setBrushSize(s)}>
+                             <div style={{ width: s + 2, height: s + 2 }} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="sub-menu-divider" />
+                    <div className="sub-menu-section">
+                      <span className="sub-label">Colors</span>
+                      <div className="color-grid">
+                        {['#000000', '#EF4444', '#3B82F6', '#22C55E', '#A855F7', '#F97316'].map(c => (
+                          <button key={c} className={`color-dot-pick ${brushColor === c ? 'active' : ''}`} style={{ backgroundColor: c }} onClick={() => setBrushColor(c)} />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
-                <svg className="drawing-svg-layer">
-                  <path 
-                    d={currentPage === 1 ? "M120,220 C180,180 280,280 380,220" : "M200,300 Q250,250 400,350"} 
-                    stroke={penColor} 
-                    strokeWidth={penSize} 
-                    fill="none" 
-                    opacity="0.8" 
-                    strokeLinecap="round" 
-                  />
-                </svg>
-             </div>
-           </div>
-        </div>
 
-        {/* --- FLOATING PAGE NAV (BOTTOM LEFT) --- */}
-        <div className="floating-page-nav shadow-lg">
-           <button className="pnav-btn" onClick={handlePrev} disabled={currentPage === 1}>
-             <ChevronLeft size={18} />
-           </button>
-           <div className="pnav-info">
-             <span className="pnav-current">{currentPage}</span>
-             <span className="pnav-divider">/</span>
-             <span className="pnav-total">{totalPages}</span>
-           </div>
-           <button className="pnav-btn" onClick={handleNext} disabled={currentPage === totalPages}>
-             <ChevronRight size={18} />
-           </button>
-        </div>
+                {/* ERASER SUB MENU */}
+                {activeSubMenu === tool.id && tool.id === 'eraser' && (
+                  <div className="tb-sub-menu animate-pop-in">
+                    <button 
+                      className={`sub-tool-item ${eraserType === 'partial' ? 'active' : ''}`} 
+                      onClick={() => { setEraserType('partial'); setActiveSubMenu(null); }}
+                    >
+                      <EraserIcon size={18} /><span>Partial Erase (Pixel)</span>
+                    </button>
+                    <button 
+                      className={`sub-tool-item ${eraserType === 'object' ? 'active' : ''}`} 
+                      onClick={() => { setEraserType('object'); setActiveSubMenu(null); }}
+                    >
+                      <Trash2 size={18} /><span>Object Erase (Full Stroke)</span>
+                    </button>
+                    <div className="sub-menu-divider" />
+                    <div className="sub-menu-section">
+                      <span className="sub-label">Size</span>
+                      <div className="size-presets">
+                        {[4, 10, 20, 40].map(s => (
+                          <button key={s} className={`size-dot ${brushSize * 5 === s ? 'active' : ''}`} onClick={() => setBrushSize(s/5)}>
+                             <div style={{ width: (s/4) + 2, height: (s/4) + 2 }} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-        {/* --- AI SIDEBAR --- */}
+                {activeSubMenu === tool.id && tool.id === 'shape' && (
+                  <div className="tb-sub-menu animate-pop-in">
+                    <button className="sub-tool-item" onClick={() => { setActiveTool('rectangle'); setActiveSubMenu(null); }}><Square size={18} /><span>Rectangle</span></button>
+                    <button className="sub-tool-item" onClick={() => { setActiveTool('circle'); setActiveSubMenu(null); }}><Circle size={18} /><span>Circle</span></button>
+                    <button className="sub-tool-item" onClick={() => { setActiveTool('line'); setActiveSubMenu(null); }}><Minus size={18} /><span>Line</span></button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="tb-divider" />
+          
+          <div className="tb-actions-group">
+            <button 
+              className="tb-action-btn"
+              onClick={() => {
+                const styles = ['blank', 'ruled', 'grid', 'dotted'];
+                const next = styles[(styles.indexOf(paperStyle) + 1) % styles.length];
+                setPaperStyle(next);
+                showToast(`Style: ${next.toUpperCase()}`, <Layout size={16}/>);
+              }}
+            >
+              <Layout size={20} />
+            </button>
+            <div className="tb-divider" />
+            
+            {/* iPad Optimized Mode Toggle */}
+            <button 
+              className={`tb-action-btn ${penOnlyMode ? 'active text-primary' : ''}`}
+              title="iPad Pen Only Mode"
+              onClick={() => {
+                setPenOnlyMode(!penOnlyMode);
+                showToast(penOnlyMode ? "Finger Draw Enabled" : "Pen Only Mode", <Pen size={16}/>);
+              }}
+            >
+              <Target size={20} />
+            </button>
+
+            <div className="tb-divider" />
+            <button className="tb-action-btn" onClick={() => setNavMode(navMode === 'free' ? 'centered' : 'free')}>
+              {navMode === 'centered' ? <Target size={20} className="text-primary" /> : <Maximize2 size={20} />}
+            </button>
+            <button className="tb-action-btn" onClick={() => setShowAiPanel(!showAiPanel)}>
+              <Sparkles size={20} color={showAiPanel ? 'var(--color-primary)' : '#64748b'} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 📘 CONTINUOUS SCROLL WORKSPACE */}
+      <main className="workspace-light">
+        <TransformWrapper
+          ref={transformRef}
+          initialScale={1}
+          minScale={0.3}
+          maxScale={6}
+          limitToBounds={navMode === 'centered'}
+          centerOnInit={true}
+          centerZoomedOut={navMode === 'centered'}
+          onTransformed={(ref) => setCurrentScale(ref.state.scale)}
+          panning={{ 
+            excluded: ["canvas", "button"],
+            // If pen-only mode is active, finger pan is ALWAYS enabled
+            disabled: !penOnlyMode && (activeTool === 'pen' || activeTool === 'highlighter' || activeTool === 'eraser'),
+            lockAxisX: navMode === 'centered' && (currentScale * (isTablet ? 840 : window.innerWidth) <= window.innerWidth),
+          }}
+        >
+          <TransformComponent
+            wrapperStyle={{ width: "100%", height: "100%", overflow: "hidden" }}
+            contentStyle={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              alignItems: "center", 
+              padding: "800px 1000px",
+            }}
+          >
+            {pages.map((pageNumber) => (
+              <div 
+                key={pageNumber} 
+                className={`floating-page-sheet sheet-style-${paperStyle} animate-fade-in`} 
+                style={{ 
+                  width: isTablet ? "840px" : "calc(100vw - 40px)", 
+                  minHeight: "1180px", 
+                  marginBottom: "40px",
+                  background: 'white'
+                }}
+              >
+                <FabricPage 
+                  ref={el => pageRefs.current[pageNumber] = el}
+                  id={`${item.id}-${pageNumber}`}
+                  width={isTablet ? 840 : window.innerWidth - 40}
+                  height={1180}
+                  activeTool={activeTool}
+                  brushColor={brushColor}
+                  brushSize={brushSize}
+                  eraserType={eraserType}
+                  penOnlyMode={penOnlyMode}
+                  initialData={localStorage.getItem(`note_data_fabric_${item.id}_${pageNumber}`)}
+                  onSave={(json) => handleSavePage(pageNumber, json)}
+                />
+                <div className="page-number-footer">{pageNumber}</div>
+              </div>
+            ))}
+            
+            <button className="add-page-plus-btn" onClick={addPage}>
+              <Plus size={24} />
+              <span>Add New Page</span>
+            </button>
+          </TransformComponent>
+        </TransformWrapper>
+
         {showAiPanel && (
           <aside className="ai-sidebar-light animate-slide-left">
-            <div className="ai-sb-header">
-              <Sparkles size={18} className="text-primary" />
-              <h3>AI Study Buddy</h3>
-              <button className="sb-close" onClick={() => setShowAiPanel(false)}><X size={16} /></button>
-            </div>
-            <div className="ai-sb-content">
-              <div className="ai-bubble-msg">
-                 Hello Alex! I see you're working on Page {currentPage}. Should I explain the core concepts on this page?
-              </div>
-              <div className="ai-sb-actions">
-                <button className="ai-sb-btn">Summarize Page {currentPage}</button>
-                <button className="ai-sb-btn">Create Quiz</button>
-              </div>
-            </div>
+            <div className="ai-sb-header"><Sparkles size={18} className="text-primary" /><h3>AI Assistant</h3><button className="sb-close" onClick={() => setShowAiPanel(false)}><X size={16} /></button></div>
+            <div className="ai-sb-content"><div className="ai-bubble-msg">How can I help you today?</div></div>
           </aside>
         )}
 
-        {/* --- TOAST --- */}
-        {toast && (
-          <div className="toast-light animate-slide-up shadow-xl">
-             {toast.icon}
-             <span>{toast.message}</span>
-          </div>
-        )}
+        {toast && <div className="toast-light animate-slide-up shadow-xl">{toast.icon}<span>{toast.message}</span></div>}
       </main>
     </div>
   );

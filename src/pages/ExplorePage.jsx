@@ -4,11 +4,36 @@ import { t, onLangChange } from '../i18n';
 import { marketplaceItems } from '../data/mockMarketplace';
 import SummaryCard from '../components/marketplace/SummaryCard';
 import PreviewModal from '../components/marketplace/PreviewModal';
+import BannerCarousel from '../components/ui/BannerCarousel';
 import DraggableFAB from '../components/ui/DraggableFAB';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
 import { useCart } from '../context/CartContext';
 import './ExplorePage.css';
+
+const promoBanners = [
+  {
+    id: 'promo-1',
+    image: '/banners/banner1.png',
+    tag: '🔥 โปรโมชั่น',
+    title: 'สรุปสอบ Midterm ลด 30%!',
+    description: 'เตรียมพร้อมสอบกลางภาคกับสรุปคุณภาพเยี่ยม ราคาพิเศษสุดๆ',
+  },
+  {
+    id: 'promo-2',
+    image: '/banners/banner2.png',
+    tag: '📚 แนะนำ',
+    title: 'Top Rated Summaries',
+    description: 'รวมสรุปยอดนิยมที่ได้คะแนนรีวิวสูงสุดจากผู้ใช้ทั่วประเทศ',
+  },
+  {
+    id: 'promo-3',
+    image: '/banners/banner3.png',
+    tag: '🎓 ฟรี!',
+    title: 'คลังสรุปฟรี ไม่มีค่าใช้จ่าย',
+    description: 'เริ่มต้นเรียนรู้ได้ทันทีกับสรุปฟรีคุณภาพดีจากผู้สร้างสรรค์',
+  },
+];
 
 const filters = ['filterAll', 'filterFree', 'filterUnder50', 'filterTopRated'];
 
@@ -107,9 +132,21 @@ export default function ExplorePage() {
   return (
     <div className="explore-page" id="explore-page">
       {/* Header */}
-      <div className="explore-header">
-        <h1 className="explore-title">{t('explore.title')}</h1>
-      </div>
+
+      {/* Promotional Banner Carousel */}
+      <BannerCarousel
+        banners={promoBanners}
+        onBannerClick={(banner) => {
+          // Could navigate to promo page or filter by tag
+          if (banner.id === 'promo-1') {
+            setActiveFilter('filterUnder50');
+          } else if (banner.id === 'promo-2') {
+            setActiveFilter('filterTopRated');
+          } else if (banner.id === 'promo-3') {
+            setActiveFilter('filterFree');
+          }
+        }}
+      />
 
       {/* Search Bar + Filter Toggle */}
       <div className="explore-search-row">

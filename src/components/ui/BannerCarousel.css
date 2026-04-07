@@ -1,0 +1,242 @@
+/* ── Banner Carousel ── */
+.banner-carousel {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: var(--color-surface);
+}
+
+.banner-carousel:hover .banner-arrow {
+  opacity: 1;
+}
+
+/* ── Slides Track ── */
+.banner-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.banner-slide {
+  min-width: 100%;
+  position: relative;
+  aspect-ratio: 21 / 8;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.banner-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.4s ease;
+}
+
+.banner-slide:hover img {
+  transform: scale(1.03);
+}
+
+/* ── Slide Overlay Content ── */
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-lg) var(--space-xl);
+  pointer-events: none;
+}
+
+.banner-overlay-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(249, 115, 22, 0.9);
+  color: white;
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  width: fit-content;
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+}
+
+.banner-overlay-title {
+  color: white;
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  margin-bottom: 4px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  line-height: 1.3;
+}
+
+.banner-overlay-desc {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--text-body-sm);
+  max-width: 420px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  line-height: 1.5;
+}
+
+/* ── Arrow Buttons ── */
+.banner-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  opacity: 0;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.banner-arrow:hover {
+  background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.banner-arrow:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.banner-arrow--left {
+  left: 12px;
+}
+
+.banner-arrow--right {
+  right: 12px;
+}
+
+/* ── Dot Indicators ── */
+.banner-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-pill);
+}
+
+.banner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.banner-dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.banner-dot--active {
+  background: white;
+  width: 24px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+/* ── Auto-slide Progress Bar ── */
+.banner-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--color-primary);
+  z-index: 4;
+  transition: width linear;
+  border-radius: 0 3px 0 0;
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.4);
+}
+
+/* ── Touch / Swipe States ── */
+.banner-carousel--dragging .banner-track {
+  transition: none;
+}
+
+.banner-carousel--dragging .banner-slide img {
+  pointer-events: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .banner-slide {
+    aspect-ratio: 16 / 8;
+  }
+
+  .banner-overlay {
+    padding: var(--space-md);
+  }
+
+  .banner-overlay-title {
+    font-size: var(--text-h3);
+  }
+
+  .banner-overlay-desc {
+    font-size: var(--text-label);
+    max-width: 280px;
+  }
+
+  .banner-arrow {
+    width: 32px;
+    height: 32px;
+    opacity: 0.7;
+  }
+
+  .banner-arrow--left {
+    left: 8px;
+  }
+
+  .banner-arrow--right {
+    right: 8px;
+  }
+
+  .banner-dots {
+    bottom: 10px;
+    gap: 6px;
+    padding: 4px 10px;
+  }
+
+  .banner-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .banner-dot--active {
+    width: 18px;
+  }
+}

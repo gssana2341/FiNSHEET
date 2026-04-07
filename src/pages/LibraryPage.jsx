@@ -28,10 +28,18 @@ export default function LibraryPage({ onOpenEditor }) {
   const [, setLangTick] = useState(0);
   const [activeTab, setActiveTab] = useState('my'); // 'my' | 'flashcards' | 'creator'
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-  const [items, setItems] = useState(libraryItems);
+  const [items, setItems] = useState(() => {
+    const saved = localStorage.getItem('user_library_items');
+    return saved ? JSON.parse(saved) : libraryItems;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('updated'); // 'updated' | 'title' | 'type' | 'opened'
   
+  // Sync items to localStorage
+  useEffect(() => {
+    localStorage.setItem('user_library_items', JSON.stringify(items));
+  }, [items]);
+
   // Modals
   const [showCreateTypeModal, setShowCreateTypeModal] = useState(false);
   const [showAIModal, setShowAIModal] = useState(false);
