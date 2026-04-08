@@ -15,8 +15,8 @@
 [data-theme='dark'] {
   --editor-bg: #0f172a; /* Deep Slate */
   --workspace-bg: #020617; /* Very Dark Slate */
-  --text-main: #f8fafc;
-  --text-dim: #94a3b8;
+  --text-main: #ffffff;
+  --text-dim: #cbd5e1; /* Lighter gray for better visibility */
   --toolbar-bg: rgba(30, 41, 59, 0.85); /* Dark Glass */
   --toolbar-border: rgba(255, 255, 255, 0.1);
   --card-bg: #1e293b;
