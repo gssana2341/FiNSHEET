@@ -3,13 +3,13 @@ import {
   StyleSheet, 
   View, 
   ActivityIndicator, 
-  SafeAreaView, 
-  Text, 
+  Text,
   TouchableOpacity,
   StatusBar,
   Platform,
-  NativeModules
+  NativeModules,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/constants/theme';
@@ -17,13 +17,12 @@ import { RefreshCcw, WifiOff } from 'lucide-react-native';
 import { pdfService } from '@/services/PdfService';
 
 // ── CONFIG ──
-// Use your local IP to connect from a physical device (Expo Go)
-// For Simulator, 'http://localhost:5173' works.
 const DEV_URL = 'http://192.168.1.218:5173'; 
 
 export default function WebContainer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const webViewRef = useRef<WebView>(null);
 
   const handleReload = () => {
@@ -33,10 +32,13 @@ export default function WebContainer() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.light.bg} />
-      
-      <View style={styles.content}>
+    <View style={[styles.container, isDarkMode && { backgroundColor: '#0f172a' }]}>
+      <StatusBar 
+        barStyle={isDarkMode ? "light-content" : "dark-content"} 
+        translucent={true} 
+        backgroundColor="transparent"
+      />
+      <SafeAreaView style={styles.content} edges={['top']}>
         <WebView
           ref={webViewRef}
           source={{ uri: DEV_URL }}
@@ -44,7 +46,6 @@ export default function WebContainer() {
           onLoadStart={() => setLoading(true)}
           onLoadEnd={() => {
             setLoading(false);
-            // Inform the web app if we have native rendering capabilities
             const hasRenderer = !!NativeModules.PdfToImage;
             webViewRef.current?.postMessage(JSON.stringify({
               type: 'NATIVE_HEALTH_CHECK',
@@ -52,36 +53,30 @@ export default function WebContainer() {
             }));
           }}
           onError={() => setError(true)}
-          // Enable common web features
           onMessage={async (event) => {
             const rawData = event.nativeEvent.data;
             try {
               const data = JSON.parse(rawData);
-              
               switch (data.type) {
                 case 'LOG':
                   console.log(`\x1b[36m[BROWSER LOG]\x1b[0m ${data.message || 'null'}`);
                   break;
-
+                case 'SET_THEME':
+                  setIsDarkMode(data.payload.isDark);
+                  break;
                 case 'PICK_PDF': {
                   console.log('[Native] Picking PDF...');
                   const pdf = await pdfService.pickAndStorePdf();
                   if (pdf) {
-                    // Send metadata first
                     webViewRef.current?.postMessage(JSON.stringify({
                       type: 'PDF_PICKED',
                       payload: pdf
                     }));
-
-                    // READ and send data for Web Fallback (Expo Go)
                     try {
                       const base64Data = await FileSystem.readAsStringAsync(pdf.uri, { encoding: 'base64' });
                       webViewRef.current?.postMessage(JSON.stringify({
                         type: 'PDF_DATA_SYNC',
-                        payload: {
-                          id: pdf.id,
-                          base64: base64Data
-                        }
+                        payload: { id: pdf.id, base64: base64Data }
                       }));
                     } catch (readErr) {
                       console.error('[Native] Failed to read PDF for sync:', readErr);
@@ -89,22 +84,14 @@ export default function WebContainer() {
                   }
                   break;
                 }
-
                 case 'REQUEST_PAGE': {
                   const { requestId, id, pageIndex, scale } = data.payload;
-                  console.log(`[Native] Page request for ${id}, page ${pageIndex}, scale ${scale}`);
-                  
                   try {
                     const base64 = await pdfService.getPageImage(id, pageIndex, scale);
                     if (base64) {
                       webViewRef.current?.postMessage(JSON.stringify({
                         type: 'PAGE_RESPONSE',
-                        payload: {
-                          requestId,
-                          base64,
-                          width: 595, // Mock width, should come from native
-                          height: 842  // Mock height, should come from native
-                        }
+                        payload: { requestId, base64, width: 595, height: 842 }
                       }));
                     }
                   } catch (err) {
@@ -112,7 +99,6 @@ export default function WebContainer() {
                   }
                   break;
                 }
-
                 default:
                   console.log(">>> [WEBVIEW EVENT]:", data);
               }
@@ -127,20 +113,18 @@ export default function WebContainer() {
           keyboardDisplayRequiresUserAction={false}
         />
 
-        {/* Loading Overlay */}
         {loading && !error && (
-          <View style={styles.centerOverlay}>
-            <ActivityIndicator size="large" color={Colors.light.primary} />
-            <Text style={styles.loadingText}>Connecting to FiNSHEET...</Text>
+          <View style={[styles.centerOverlay, isDarkMode && { backgroundColor: '#0f172a' }]}>
+            <ActivityIndicator size="large" color={isDarkMode ? '#ffffff' : Colors.light.primary} />
+            <Text style={[styles.loadingText, isDarkMode && { color: '#94a3b8' }]}>Connecting to FiNSHEET...</Text>
           </View>
         )}
 
-        {/* Error State */}
         {error && (
-          <View style={styles.centerOverlay}>
-            <WifiOff size={48} color={Colors.light.textTertiary} />
-            <Text style={styles.errorTitle}>Cannot connect to server</Text>
-            <Text style={styles.errorSub}>
+          <View style={[styles.centerOverlay, isDarkMode && { backgroundColor: '#0f172a' }]}>
+            <WifiOff size={48} color={isDarkMode ? '#f8fafc' : Colors.light.textTertiary} />
+            <Text style={[styles.errorTitle, isDarkMode && { color: '#f8fafc' }]}>Cannot connect to server</Text>
+            <Text style={[styles.errorSub, isDarkMode && { color: '#94a3b8' }]}>
               Make sure your Vite server is running at:{"\n"}
               <Text style={{ fontWeight: 'bold' }}>{DEV_URL}</Text>
             </Text>
@@ -150,15 +134,15 @@ export default function WebContainer() {
             </TouchableOpacity>
           </View>
         )}
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.bg,
+    backgroundColor: '#f1f0e9',
   },
   content: {
     flex: 1,

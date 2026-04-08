@@ -232,11 +232,19 @@ export default function LibraryPage({ onOpenEditor }) {
     }, 20);
   };
 
-  const handlePdfUpload = async (e) => {
+  const handlePdfImportClick = () => {
     if (isNativeHost) {
+      // Direct bridge call - SKIP hidden browser input
       window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'PICK_PDF' }));
-      return;
+    } else {
+      // Traditional web picker
+      document.getElementById('pdf-upload')?.click();
     }
+  };
+
+  const handlePdfUpload = async (e) => {
+    // We already handled native logic in handlePdfImportClick
+    if (isNativeHost) return;
 
     const file = e.target.files?.[0];
     if (!file) return;
@@ -579,7 +587,7 @@ export default function LibraryPage({ onOpenEditor }) {
               <p>สร้างชีทใหม่ที่ไม่มีเนื้อหา เพื่อพิมพ์และจัดรูปแบบสรุปด้วยตัวเอง</p>
             </div>
           </Card>
-          <Card variant="default" className="create-type-card" onClick={() => document.getElementById('pdf-upload').click()}>
+          <Card variant="default" className="create-type-card" onClick={handlePdfImportClick}>
             <div className="create-type-icon"><Upload size={32} color="var(--color-success)"/></div>
             <div className="create-type-info">
               <h3>นำเข้าไฟล์ PDF</h3>

@@ -5,7 +5,7 @@ import {
   GripVertical, Target, Maximize2, CheckCircle2,
   Type, Square, Circle, Minus, MousePointer, 
   ChevronDown, Trash2, Eraser as EraserIcon,
-  RotateCcw, RotateCw, Save, Hand
+  RotateCcw, RotateCw, Save, Hand, Moon, Sun
 } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import FabricPage from './FabricPage';
@@ -33,8 +33,11 @@ const PdfPreviewStatic = ({ pdfId, pageNumber, width, scale = 2.5 }) => {
 
     return () => { 
       isMounted = false; 
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
+      const urlToRevoke = objectUrlRef.current;
+      if (urlToRevoke) {
+        setTimeout(() => {
+          try { URL.revokeObjectURL(urlToRevoke); } catch(e) {}
+        }, 3000); 
         objectUrlRef.current = null;
       }
     };
@@ -50,11 +53,11 @@ const PdfPreviewStatic = ({ pdfId, pageNumber, width, scale = 2.5 }) => {
   const h = Math.round(width * aspectRatio);
 
   return (
-    <div style={{ width: '100%', height: h, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ width: '100%', height: h, background: 'var(--card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <img 
         src={preview.url} 
         alt="" 
-        style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+        style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'var(--pdf-filter)' }} 
       />
     </div>
   );
@@ -69,6 +72,9 @@ export default function NoteEditor({ item, onClose }) {
   const [eraserType, setEraserType] = useState('partial'); // 'partial' | 'object'
   const [activeSubMenu, setActiveSubMenu] = useState(null); 
   const [isPenVerified, setIsPenVerified] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('lovesheet_theme') === 'dark';
+  });
   
   // --- UI & Navigation State ---
   const [showAiPanel, setShowAiPanel] = useState(false);
@@ -78,10 +84,23 @@ export default function NoteEditor({ item, onClose }) {
     if (item?.pageCount) return Array.from({ length: item.pageCount }, (_, i) => i + 1);
     return [1, 2, 3];
   }); 
+  const [isSyncing, setIsSyncing] = useState(item?.type === 'pdf');
   const [navMode, setNavMode] = useState('centered'); 
   const [currentScale, setCurrentScale] = useState(1);
   const [penOnlyMode, setPenOnlyMode] = useState(false);
   const [activePage, setActivePage] = useState(1);
+
+  useEffect(() => {
+    localStorage.setItem('lovesheet_theme', isDarkMode ? 'dark' : 'light');
+    
+    // Sync to Native Host
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'SET_THEME',
+        payload: { isDark: isDarkMode }
+      }));
+    }
+  }, [isDarkMode]);
 
   const savePosTimer = useRef(null);
   const didMountRef = useRef(false);
@@ -112,10 +131,10 @@ export default function NoteEditor({ item, onClose }) {
   // Use adaptive settings for iPad/Mobile to prevent crashes
   const highResScale = isMobile ? 2.0 : 2.5; 
   const previewScale = isMobile ? 1.0 : 1.2; // Low res for scrolling
-  const nearbyBuffer = isMobile ? 1 : 3;
+  const nearbyBuffer = isMobile ? 5 : 3; // Aggressive buffer for iPad
 
   useEffect(() => {
-    console.log(`[NoteEditor] Performance Mode: ${isMobile ? 'iPad' : 'Desktop'}. Preview: ${previewScale}x, Active: ${highResScale}x`);
+    // Performance Mode: iPad/Desktop initialization optimized
   }, []);
 
   const showToast = (message, icon) => {
@@ -165,15 +184,23 @@ export default function NoteEditor({ item, onClose }) {
   // PDF Document Session Management (Lifecycle)
   useEffect(() => {
     if (item?.type === 'pdf') {
+      setIsSyncing(true);
       // Warm up the document session
       pdfEngine.ensureDocument(item.id).then(pdf => {
+        setIsSyncing(false);
         // Correct the page count if it was unknown or wrong
         if (pdf && pdf.numPages && pdf.numPages !== pages.length) {
           console.log(`[NoteEditor] Syncing pages: ${pdf.numPages}`);
           setPages(Array.from({ length: pdf.numPages }, (_, i) => i + 1));
         }
+
+        // AGGRESSIVE WARM-UP: Pre-render all pages in background
+        if (pdf && pdf.numPages) {
+          pdfEngine.warmUp(item.id, pdf.numPages);
+        }
       }).catch(err => {
         console.error("[NoteEditor] PDF sync failed:", err);
+        setIsSyncing(false);
       });
 
       // Aggressive Cleanup: Close the PDF session when leaving
@@ -304,16 +331,17 @@ export default function NoteEditor({ item, onClose }) {
   const isInteractiveTool = ['pen', 'highlighter', 'eraser', 'lasso', 'text', 'rectangle', 'circle', 'line', 'shape'].includes(activeTool);
 
   return (
-    <div className={`note-editor zen-mode ${isTablet ? 'tablet-view' : 'mobile-view'}`}>
+    <div className={`note-editor zen-mode ${isTablet ? 'tablet-view' : 'mobile-view'}`} data-theme={isDarkMode ? 'dark' : 'light'}>
       {/* 🚀 PROFESSIONAL TOOLBAR */}
       <div className="pro-floating-toolbar animate-slide-down" ref={toolbarRef}>
         <div className="toolbar-inner">
-          <button className="tb-back-btn" onClick={handleClose}><ChevronLeft size={20}/></button>
+          <button className="tb-back-btn" onClick={handleClose} title="Back to Library"><ChevronLeft size={24}/></button>
           
           <div className="tb-divider" />
 
           {/* HISTORY GROUP */}
           <div className="tb-actions-group">
+            <span className="tb-group-label" style={{ marginRight: '8px' }}>History</span>
             <button className="tb-action-btn" onClick={handleUndo} title="Undo"><RotateCcw size={18} /></button>
             <button className="tb-action-btn" onClick={handleRedo} title="Redo"><RotateCw size={18} /></button>
           </div>
@@ -321,6 +349,7 @@ export default function NoteEditor({ item, onClose }) {
           <div className="tb-divider" />
           
           <div className="tb-tools-group">
+            <span className="tb-group-label" style={{ marginRight: '8px' }}>Tools</span>
             {mainTools.map(tool => (
               <div key={tool.id} className="tb-tool-wrapper">
                 <button 
@@ -397,30 +426,27 @@ export default function NoteEditor({ item, onClose }) {
           <div className="tb-divider" />
           
           <div className="tb-actions-group">
+            <span className="tb-group-label" style={{ marginRight: '8px' }}>Global</span>
+            <button 
+              className={`tb-action-btn ${isDarkMode ? 'active' : ''}`}
+              title="Toggle Dark Mode"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+            >
+              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <button className="tb-action-btn" onClick={handleManualSave} title="Save Now"><Save size={18} /></button>
             <button 
-              className="tb-action-btn"
-              title="Paper Style"
-              onClick={() => {
-                const styles = ['blank', 'ruled', 'grid', 'dotted'];
-                const next = styles[(styles.indexOf(paperStyle) + 1) % styles.length];
-                setPaperStyle(next);
-              }}
-            >
-              <Layout size={20} />
-            </button>
-            <button 
-              className={`tb-action-btn ${penOnlyMode ? 'active text-primary' : ''}`}
+              className={`tb-action-btn ${penOnlyMode ? 'active' : ''}`}
               title={penOnlyMode ? "Pencil Mode Active" : "Enable Smart Pen Mode"}
               onClick={() => setPenOnlyMode(!penOnlyMode)}
             >
               <Target size={20} className={penOnlyMode && !isPenVerified ? "animate-pulse" : ""} />
             </button>
             <button className="tb-action-btn" onClick={() => setNavMode(navMode === 'free' ? 'centered' : 'free')}>
-              {navMode === 'centered' ? <Maximize2 size={20} className="text-primary" /> : <Maximize2 size={20} />}
+              {navMode === 'centered' ? <Maximize2 size={20} style={{ color: '#f97316' }} /> : <Maximize2 size={20} />}
             </button>
             <button className="tb-action-btn" onClick={() => setShowAiPanel(!showAiPanel)}>
-              <Sparkles size={20} color={showAiPanel ? 'var(--color-primary)' : '#64748b'} />
+              <Sparkles size={20} style={{ color: showAiPanel ? '#f97316' : '#64748b' }} />
             </button>
           </div>
         </div>
@@ -510,7 +536,7 @@ export default function NoteEditor({ item, onClose }) {
                   {shouldMountCanvas ? (
                     <FabricPage 
                       ref={el => pageRefs.current[pageNumber] = el}
-                      id={`${item.id}-${pageNumber}`}
+                      notebookId={item.id}
                       pdfId={item?.type === 'pdf' ? item.id : null}
                       pageNumber={pageNumber}
                       width={isTablet ? 840 : window.innerWidth - 40}
@@ -553,6 +579,27 @@ export default function NoteEditor({ item, onClose }) {
         )}
 
         {toast && <div className="toast-light animate-slide-up shadow-xl">{toast.icon}<span>{toast.message}</span></div>}
+
+        {isSyncing && (
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(248, 250, 252, 0.95)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 2000,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '24px'
+          }}>
+            <div className="loader-spinner" style={{ width: '40px', height: '40px', borderWidth: '3px' }}></div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>🚀 Preparing Original PDF</div>
+              <div style={{ fontSize: '14px', color: '#64748b' }}>Establishing secure data bridge with iPad...</div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

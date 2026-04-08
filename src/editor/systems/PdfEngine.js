@@ -64,12 +64,12 @@ class PdfEngine {
             }
             
             this.pdfStore.setItem(id, bytes).then(() => {
-              console.log(`[PdfEngine] PDF "${id}" successfully stored in local DB`);
+              console.log(`[PdfEngine] PDF "${id}" successfully stored in local DB (${bytes.length} bytes)`);
               this.syncingDocs.delete(id);
               resolveSync();
             });
           } catch (err) {
-            console.error('[PdfEngine] Base64 conversion failed:', err);
+            console.error('[PdfEngine] Base64 conversion failed:', err.message || err);
           }
         }
 
@@ -132,17 +132,17 @@ class PdfEngine {
       
       // Retry a few times if not found (brief delay)
       if (!uint8) {
-        for (let i = 0; i < 5; i++) {
-          console.log(`[PdfEngine] PDF "${id}" not in DB, retrying... (${i+1}/5)`);
-          await new Promise(r => setTimeout(r, 500));
+        for (let i = 0; i < 10; i++) {
+          console.log(`[PdfEngine] PDF "${id}" not in DB, retrying... (${i+1}/10)`);
+          await new Promise(r => setTimeout(r, 800));
           uint8 = await this.pdfStore.getItem(id);
           if (uint8) break;
         }
       }
 
-      if (!uint8) throw new Error(`PDF data for "${id}" not found in DB after retries`);
+      if (!uint8) throw new Error(`PDF data for "${id}" not found in DB after 10 retries. Sync might have failed.`);
 
-      console.log(`[PdfEngine] Opening document "${id}" (First-time parse)...`);
+      console.log(`[PdfEngine] Opening document "${id}" (Size: ${uint8.length} bytes)...`);
       const loadingTask = pdfjsLib.getDocument({ 
         data: uint8.slice(0),
         useWorkerFetch: false,
@@ -155,6 +155,29 @@ class PdfEngine {
     })();
 
     return this.loadingPromise;
+  }
+
+  /**
+   * Warm-up all pages in the background (Aggressive Caching)
+   */
+  async warmUp(id, pageCount) {
+    console.log(`[PdfEngine] Aggressive Warm-up started for ${id} (${pageCount} pages)`);
+    
+    // We only warm up at 1.0x - this provides the instant "Ghost" image
+    const WARMUP_SCALE = 1.0; 
+
+    // Don't wait for completion - just fire and forget the requests
+    // The internal queue will manage the serialization and prioritization
+    for (let i = 1; i <= pageCount; i++) {
+      const key = `${id}_p${i}_s${WARMUP_SCALE}`;
+      
+      // Check cache first to avoid redundant bridge calls
+      const cached = await this.cacheStore.getItem(key);
+      if (!cached) {
+        // Enqueue as low priority - this lets user-visible requests jump in front
+        this.requestPageImage(id, i, WARMUP_SCALE, 'low').catch(() => {});
+      }
+    }
   }
 
   /**
@@ -237,6 +260,7 @@ class PdfEngine {
         }
         handlers.forEach(h => h.resolve(result));
       } catch (err) {
+        console.error(`[PdfEngine] Failed to process Page ${task.pageNumber}:`, err.message || err);
         handlers.forEach(h => h.reject(err));
       } finally {
         this.requestHandlers.delete(task.key);

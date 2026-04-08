@@ -39,6 +39,9 @@ export function useGestures(engine, options = {}) {
     el.style.touchAction = penOnlyMode ? "pan-x pan-y" : "none";
 
     const onNativeInteractionCapture = (e) => {
+      // SAFETY GATE: Ensure engine and canvas are still valid
+      if (!engine || !engine.canvas || !engine.toolManager) return;
+
       // 1. TOOL & INPUT ANALYSIS
       const isPointerPen =
         e.pointerType === "pen" ||
@@ -53,7 +56,7 @@ export function useGestures(engine, options = {}) {
         toolId === "pen" ||
         toolId === "highlighter" ||
         (toolId === "eraser" &&
-          engine.toolManager.activeTool.type === "partial");
+          engine.toolManager.activeTool?.type === "partial");
 
       // 2. STYLUS TRACKING (CRITICAL: Always track pen state even in Normal Mode)
       if (isActuallyPen) {
@@ -122,6 +125,9 @@ export function useGestures(engine, options = {}) {
     };
 
     const onNativeInteractionBubble = (e) => {
+      // SAFETY GATE
+      if (!engine || !engine.toolManager) return;
+
       const isPointerPen =
         e.pointerType === "pen" ||
         (e.type === "pointerdown" && e.pressure > 0.1);

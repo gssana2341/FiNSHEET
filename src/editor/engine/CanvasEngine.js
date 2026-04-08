@@ -17,6 +17,19 @@ class CanvasEngine {
       perPixelTargetFind: true,
       targetFindTolerance: 6,
     });
+
+    // --- Premium Selection Styling ---
+    fabric.Object.prototype.set({
+      transparentCorners: false,
+      cornerColor: '#f97316', // Brand Orange
+      cornerStrokeColor: '#ffffff',
+      cornerStyle: 'circle',
+      cornerSize: 10,
+      borderColor: '#f97316',
+      borderDashArray: [4, 4],
+      padding: 8,
+      borderScaleFactor: 2,
+    });
     
     this.isDisposed = false;
     this.activeColor = '#000000';

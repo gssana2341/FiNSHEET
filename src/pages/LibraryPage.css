@@ -354,54 +354,60 @@
 .lib-grid-item {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 12px;
   cursor: pointer;
-  transition: transform var(--transition-fast);
-  position: relative; /* Ensure kids can be absolute to it */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .lib-grid-item:hover {
-  transform: translateY(-2px);
-}
-
-.lib-grid-item:hover .lib-grid-cover {
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
 }
 
 .lib-grid-cover {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1.414;
-  background: #333333; /* Dark aesthetic cover */
-  border-radius: var(--radius-sm);
+  background: #252422; /* Premium Deep Charcoal */
+  border-radius: 12px;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-md);
-  box-shadow: var(--shadow-sm);
-  overflow: visible; /* Let dropdown go out */
-  transition: box-shadow var(--transition-fast);
+  padding: 24px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08), 
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.25s ease;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.lib-grid-cover::before {
-  content: '';
+.lib-grid-item:hover .lib-grid-cover {
+  box-shadow: 
+    0 20px 48px -12px rgba(0, 0, 0, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Book Binding Effect */
+.lib-grid-cover::after {
+  content: "";
   position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 8px;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
+  top: 0; left: 0; bottom: 0;
+  width: 12px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+  z-index: 2;
 }
 
 .lib-cover-title {
   text-align: center;
-  font-weight: 500;
-  font-size: 11px;
-  opacity: 0.8;
+  font-weight: 700;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
   word-break: break-word;
   padding: 0 10px;
+  z-index: 5;
+  letter-spacing: -0.2px;
 }
 
 /* Cover Badges */
@@ -537,46 +543,21 @@
 }
 
 .lib-grid-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0;
-  line-height: 1.3;
-  padding-right: 24px; /* Space for dots */
-}
-
-/* Redesigned Three Dots Menu (Absolute Bottom Right) */
-.lib-card-more-wrapper {
-  position: absolute;
-  bottom: 8px;
-  right: 4px;
-  z-index: 10;
-}
-
-.lib-card-more-btn {
-  width: 24px;
-  height: 24px;
-  background: transparent;
-  border: none;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-tertiary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.lib-card-more-btn:hover, .lib-card-more-btn.active {
-  background: var(--color-surface-hover);
-  color: var(--color-primary);
+  line-height: 1.4;
+  letter-spacing: -0.1px;
 }
 
 .lib-grid-meta {
-  font-size: 10px;
-  color: var(--color-text-secondary);
-  margin: 0;
-  padding-right: 24px; /* Space for dots */
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 2px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1px;
 }
 
 /* Creation Modal Option Cards */

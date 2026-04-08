@@ -14,7 +14,7 @@ import StorageSystem from '../systems/StorageSystem';
  * useEditor Hook
  * Orchestrates all systems and provides a clean interface to UI components.
  */
-export function useEditor(id, canvasElement, width, height) {
+export function useEditor(notebookId, pageNumber, canvasElement, width, height) {
   const engineRef = useRef(null);
   const toolManagerRef = useRef(null);
   const historyRef = useRef(null);
@@ -54,7 +54,7 @@ export function useEditor(id, canvasElement, width, height) {
     historyRef.current = history;
 
     // 4. Load initial data
-    storageRef.current.loadPage('notebook_1', id).then(savedData => {
+    storageRef.current.loadPage(notebookId, pageNumber).then(savedData => {
       if (savedData && !engine.isDisposed) {
         engine.loadData(savedData);
       }
@@ -69,7 +69,7 @@ export function useEditor(id, canvasElement, width, height) {
     return () => {
       engine.dispose();
     };
-  }, [canvasElement, id]);
+  }, [canvasElement, notebookId, width, height]);
 
   const setTool = useCallback((toolId, settings) => {
     if (engineRef.current) {
@@ -90,13 +90,13 @@ export function useEditor(id, canvasElement, width, height) {
   const save = useCallback(() => {
     if (engineRef.current) {
       const data = engineRef.current.getData();
-      storageRef.current.savePage('notebook_1', id, data);
+      storageRef.current.savePage(notebookId, pageNumber, data);
     }
-  }, [id]);
+  }, [notebookId, pageNumber]);
 
   // --- Auto-Save System ---
   useEffect(() => {
-    if (!isReady || !engineRef.current) return;
+    if (!isReady || !engineRef.current || !notebookId) return;
     const engine = engineRef.current;
     
     const handleModified = () => {
@@ -107,7 +107,7 @@ export function useEditor(id, canvasElement, width, height) {
     return () => {
       engine.off('modified', handleModified);
     };
-  }, [isReady, save]);
+  }, [isReady, save, notebookId]);
 
   return {
     isReady,

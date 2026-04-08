@@ -5,7 +5,7 @@ import { useGestures } from '../../editor/hooks/useGestures';
 import { pdfEngine } from '../../editor/systems/PdfEngine';
 
 const FabricPage = forwardRef(({ 
-  id, 
+  notebookId,
   pdfId,
   pageNumber,
   width, 
@@ -24,42 +24,64 @@ const FabricPage = forwardRef(({
   const [previewUrl, setPreviewUrl] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   
-  // Track the Object URL so we can revoke it later to free memory (GoodNotes style)
+  // Track the Object URL so we can revoke it later to free memory
   const objectUrlRef = useRef(null);
+  const isMounted = useRef(false);
 
   // Update canvas element state once ref is attached
   React.useEffect(() => {
+    isMounted.current = true;
     if (canvasRef.current) {
       setCanvasEl(canvasRef.current);
     }
+    return () => { isMounted.current = false; };
   }, []);
 
   // --- Instant Preview Loading (Blob URL) ---
   React.useEffect(() => {
-    if (pdfId) {
-      console.log(`[FabricPage] Requesting Page ${pageNumber} (Priority: high)`);
+    if (pdfId && pageNumber) {
+      setLoading(true);
+      console.log(`[FabricPage] Requesting Page ${pageNumber} (ID: ${pdfId})`);
+      
       pdfEngine.requestPageImage(pdfId, pageNumber, scale, 'high')
         .then(res => {
+          if (!isMounted.current) return; // Prevent state update on unmounted component
+
           if (res.blob) {
+            // REVOKE Previous URL before creating new one if it changed
+            if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+            
             const url = URL.createObjectURL(res.blob);
             objectUrlRef.current = url;
-            setPreviewUrl({ url, pageWidth: res.pageWidth, pageHeight: res.pageHeight });
+            setPreviewUrl({ 
+              url, 
+              pageWidth: res.pageWidth || 595, // Default A4 if missing
+              pageHeight: res.pageHeight || 842 
+            });
           } else if (res.dataUrl) {
-            setPreviewUrl({ url: res.dataUrl, pageWidth: res.pageWidth, pageHeight: res.pageHeight });
+            setPreviewUrl({ 
+              url: res.dataUrl, 
+              pageWidth: res.pageWidth || 595, 
+              pageHeight: res.pageHeight || 842 
+            });
           }
           setLoading(false);
         })
         .catch(err => {
           console.error(`[FabricPage] Page ${pageNumber} load failed:`, err);
-          setLoading(false);
+          if (isMounted.current) setLoading(false);
         });
     }
 
-    // CLEANUP: Revoke the Object URL to free memory immediately! 
+    // CLEANUP: Revoke the Object URL only when unmounting OR when ID changes
     return () => {
-      if (objectUrlRef.current) {
-        console.log(`[FabricPage] Unmounting Page ${pageNumber} - Revoking memory...`);
-        URL.revokeObjectURL(objectUrlRef.current);
+      // NOTE: We delay revocation slightly to allow Fabric to finish any async image loading
+      // this prevents the "Error loading blob" crash.
+      const urlToRevoke = objectUrlRef.current;
+      if (urlToRevoke) {
+        setTimeout(() => {
+          try { URL.revokeObjectURL(urlToRevoke); } catch(e) {}
+        }, 3000); // 3-second grace period for Fabric
         objectUrlRef.current = null;
       }
     };
@@ -76,11 +98,11 @@ const FabricPage = forwardRef(({
     redo, 
     save,
     engine 
-  } = useEditor(id, canvasEl, width, height);
+  } = useEditor(notebookId, pageNumber, canvasEl, width, height);
 
   // Sync tools when props change
   React.useEffect(() => {
-    if (isReady) {
+    if (isReady && setTool) {
       setTool(activeTool, { 
         color: brushColor, 
         size: brushSize,
@@ -91,23 +113,27 @@ const FabricPage = forwardRef(({
 
   // Handle Resize Support
   React.useEffect(() => {
-    if (isReady && engine) {
+    if (isReady && engine && engine.canvas) {
       engine.setSize(width, height);
     }
   }, [width, height, isReady, engine]);
 
   // Load PDF Background into Canvas
   React.useEffect(() => {
-    if (isReady && engine && engine.canvas && previewUrl) {
-      // Calculate canvas height based on PDF page aspect ratio
-      const aspectRatio = previewUrl.pageHeight / previewUrl.pageWidth;
+    if (isReady && engine && engine.canvas && previewUrl && previewUrl.url) {
+      // Calculate canvas height based on PDF page aspect ratio (Safety Gate)
+      const pw = previewUrl.pageWidth || 1;
+      const ph = previewUrl.pageHeight || 1;
+      const aspectRatio = ph / pw;
       const canvasHeight = Math.round(width * aspectRatio);
       
       engine.canvas.setWidth(width);
       engine.canvas.setHeight(canvasHeight);
 
       fabric.Image.fromURL(previewUrl.url, (img) => {
-        if (!engine.canvas) return; // Safety check
+        // Double safety for unmount
+        if (!isMounted.current || !engine.canvas) return;
+        
         const scaleX = width / img.width;
         const scaleY = canvasHeight / img.height;
         img.set({
@@ -116,7 +142,11 @@ const FabricPage = forwardRef(({
           originX: 'left',
           originY: 'top'
         });
-        engine.canvas.setBackgroundImage(img, engine.canvas.renderAll.bind(engine.canvas));
+        engine.canvas.setBackgroundImage(img, () => {
+          if (isMounted.current && engine.canvas) {
+            engine.canvas.renderAll();
+          }
+        });
       });
     }
   }, [isReady, engine, previewUrl, width]);
@@ -134,18 +164,25 @@ const FabricPage = forwardRef(({
     save
   }));
 
+  if (!notebookId) return null; // Safety render guard
+
+  // Dynamic Height calculation (Safety Gate)
+  const calcHeight = previewUrl && previewUrl.pageWidth > 0 
+    ? (width * (previewUrl.pageHeight / previewUrl.pageWidth)) 
+    : height;
+
   return (
     <div 
       className="fabric-page-container" 
       style={{ 
         position: 'relative', 
         touchAction: 'none',
-        minHeight: previewUrl ? (width * (previewUrl.pageHeight / previewUrl.pageWidth)) : height,
+        minHeight: calcHeight || 800,
         backgroundColor: '#fff'
       }}
     >
       {/* Instant Ghost Preview: Shows immediately before canvas is ready */}
-      {previewUrl && (
+      {previewUrl && previewUrl.url && (
         <img 
           src={previewUrl.url} 
           alt=""
@@ -157,7 +194,8 @@ const FabricPage = forwardRef(({
             objectFit: 'contain',
             zIndex: isReady ? 0 : 2,
             opacity: isReady ? 0 : 1, // Hide preview once canvas is live
-            transition: 'opacity 0.2s ease'
+            transition: 'opacity 0.2s ease',
+            pointerEvents: 'none'
           }}
         />
       )}
