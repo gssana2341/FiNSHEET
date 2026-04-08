@@ -7,11 +7,14 @@ import {
   Text, 
   TouchableOpacity,
   StatusBar,
-  Platform
+  Platform,
+  NativeModules
 } from 'react-native';
 import { WebView } from 'react-native-webview';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/constants/theme';
 import { RefreshCcw, WifiOff } from 'lucide-react-native';
+import { pdfService } from '@/services/PdfService';
 
 // ── CONFIG ──
 // Use your local IP to connect from a physical device (Expo Go)
@@ -39,21 +42,82 @@ export default function WebContainer() {
           source={{ uri: DEV_URL }}
           style={styles.webview}
           onLoadStart={() => setLoading(true)}
-          onLoadEnd={() => setLoading(false)}
+          onLoadEnd={() => {
+            setLoading(false);
+            // Inform the web app if we have native rendering capabilities
+            const hasRenderer = !!NativeModules.PdfToImage;
+            webViewRef.current?.postMessage(JSON.stringify({
+              type: 'NATIVE_HEALTH_CHECK',
+              payload: { hasRenderer }
+            }));
+          }}
           onError={() => setError(true)}
           // Enable common web features
-          onMessage={(event) => {
+          onMessage={async (event) => {
             const rawData = event.nativeEvent.data;
-            // Immediate log to terminal so we see anything coming in
-            console.log(">>> [WEBVIEW EVENT]:", rawData);
-            
             try {
               const data = JSON.parse(rawData);
-              if (data.type === 'LOG') {
-                console.log(`\x1b[36m[BROWSER LOG]\x1b[0m ${data.message}`);
+              
+              switch (data.type) {
+                case 'LOG':
+                  console.log(`\x1b[36m[BROWSER LOG]\x1b[0m ${data.message || 'null'}`);
+                  break;
+
+                case 'PICK_PDF': {
+                  console.log('[Native] Picking PDF...');
+                  const pdf = await pdfService.pickAndStorePdf();
+                  if (pdf) {
+                    // Send metadata first
+                    webViewRef.current?.postMessage(JSON.stringify({
+                      type: 'PDF_PICKED',
+                      payload: pdf
+                    }));
+
+                    // READ and send data for Web Fallback (Expo Go)
+                    try {
+                      const base64Data = await FileSystem.readAsStringAsync(pdf.uri, { encoding: 'base64' });
+                      webViewRef.current?.postMessage(JSON.stringify({
+                        type: 'PDF_DATA_SYNC',
+                        payload: {
+                          id: pdf.id,
+                          base64: base64Data
+                        }
+                      }));
+                    } catch (readErr) {
+                      console.error('[Native] Failed to read PDF for sync:', readErr);
+                    }
+                  }
+                  break;
+                }
+
+                case 'REQUEST_PAGE': {
+                  const { requestId, id, pageIndex, scale } = data.payload;
+                  console.log(`[Native] Page request for ${id}, page ${pageIndex}, scale ${scale}`);
+                  
+                  try {
+                    const base64 = await pdfService.getPageImage(id, pageIndex, scale);
+                    if (base64) {
+                      webViewRef.current?.postMessage(JSON.stringify({
+                        type: 'PAGE_RESPONSE',
+                        payload: {
+                          requestId,
+                          base64,
+                          width: 595, // Mock width, should come from native
+                          height: 842  // Mock height, should come from native
+                        }
+                      }));
+                    }
+                  } catch (err) {
+                    console.error('[Native] Rendering error:', err);
+                  }
+                  break;
+                }
+
+                default:
+                  console.log(">>> [WEBVIEW EVENT]:", data);
               }
             } catch (e) {
-              // Ignore parse errors for non-JSON messages
+              console.log(">>> [WEBVIEW EVENT (Raw)]:", rawData);
             }
           }}
           javaScriptEnabled={true}

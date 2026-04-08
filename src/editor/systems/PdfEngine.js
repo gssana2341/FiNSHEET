@@ -25,6 +25,71 @@ class PdfEngine {
     this.queue = [];
     this.processing = false;
     this.requestHandlers = new Map(); // key -> { resolve, reject }[]
+    this.syncingDocs = new Map(); // id -> Promise (resolves when sync finished)
+
+    // Native Bridge state
+    this.isNativeHost = typeof window !== 'undefined' && !!window.ReactNativeWebView;
+    this.isNativeRendererReady = false; // Will be confirmed by the host
+    this.nativePendingRequests = new Map(); // requestId -> { resolve, reject }
+
+    if (this.isNativeHost) {
+      this.setupNativeBridge();
+    }
+  }
+
+  setupNativeBridge() {
+    window.addEventListener('message', (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'NATIVE_HEALTH_CHECK') {
+          this.isNativeRendererReady = data.payload.hasRenderer;
+          console.log(`[PdfEngine] Native Renderer Ready: ${this.isNativeRendererReady}`);
+        }
+
+        if (data.type === 'PDF_DATA_SYNC') {
+          const { id, base64 } = data.payload;
+          console.log(`[PdfEngine] Received PDF Data Sync for ${id}`);
+          
+          let resolveSync;
+          const syncPromise = new Promise(res => { resolveSync = res; });
+          this.syncingDocs.set(id, syncPromise);
+
+          // Convert Base64 to Uint8Array (Standard for pdf.js)
+          try {
+            const binaryString = window.atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            
+            this.pdfStore.setItem(id, bytes).then(() => {
+              console.log(`[PdfEngine] PDF "${id}" successfully stored in local DB`);
+              this.syncingDocs.delete(id);
+              resolveSync();
+            });
+          } catch (err) {
+            console.error('[PdfEngine] Base64 conversion failed:', err);
+          }
+        }
+
+        if (data.type === 'PAGE_RESPONSE') {
+          const { requestId, base64, width, height } = data.payload;
+          const handler = this.nativePendingRequests.get(requestId);
+          if (handler) {
+            // Convert base64 to blob for compatibility with existing CanvasEngine
+            fetch(`data:image/jpeg;base64,${base64}`)
+              .then(res => res.blob())
+              .then(blob => {
+                handler.resolve({ blob, pageWidth: width, pageHeight: height });
+                this.nativePendingRequests.delete(requestId);
+              });
+          }
+        }
+      } catch (err) {
+        // Not for us or malformed
+      }
+    });
   }
 
   /**
@@ -57,8 +122,25 @@ class PdfEngine {
 
     this.activeId = id;
     this.loadingPromise = (async () => {
-      const uint8 = await this.pdfStore.getItem(id);
-      if (!uint8) throw new Error(`PDF data for "${id}" not found in DB`);
+      // Wait for sync if it's in progress
+      if (this.syncingDocs.has(id)) {
+        console.log(`[PdfEngine] Waiting for sync to finish for "${id}"...`);
+        await this.syncingDocs.get(id);
+      }
+
+      let uint8 = await this.pdfStore.getItem(id);
+      
+      // Retry a few times if not found (brief delay)
+      if (!uint8) {
+        for (let i = 0; i < 5; i++) {
+          console.log(`[PdfEngine] PDF "${id}" not in DB, retrying... (${i+1}/5)`);
+          await new Promise(r => setTimeout(r, 500));
+          uint8 = await this.pdfStore.getItem(id);
+          if (uint8) break;
+        }
+      }
+
+      if (!uint8) throw new Error(`PDF data for "${id}" not found in DB after retries`);
 
       console.log(`[PdfEngine] Opening document "${id}" (First-time parse)...`);
       const loadingTask = pdfjsLib.getDocument({ 
@@ -141,7 +223,18 @@ class PdfEngine {
       if (!handlers) continue;
       
       try {
-        const result = await this.getPageImageInternal(task.id, task.pageNumber, task.scale);
+        let result;
+        // Use native only if it's a native host AND the renderer is confirmed ready
+        if (this.isNativeHost && this.isNativeRendererReady) {
+          try {
+            result = await this.getPageImageNative(task.id, task.pageNumber, task.scale);
+          } catch (err) {
+            console.warn('[PdfEngine] Native render failed, falling back to internal:', err);
+            result = await this.getPageImageInternal(task.id, task.pageNumber, task.scale);
+          }
+        } else {
+          result = await this.getPageImageInternal(task.id, task.pageNumber, task.scale);
+        }
         handlers.forEach(h => h.resolve(result));
       } catch (err) {
         handlers.forEach(h => h.reject(err));
@@ -154,6 +247,32 @@ class PdfEngine {
     }
 
     this.processing = false;
+  }
+
+  async getPageImageNative(id, pageIndex, scale) {
+    const requestId = `${id}_p${pageIndex}_s${scale}_${Date.now()}`;
+    
+    return new Promise((resolve, reject) => {
+      this.nativePendingRequests.set(requestId, { resolve, reject });
+      
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'REQUEST_PAGE',
+        payload: {
+          requestId,
+          id,
+          pageIndex,
+          scale
+        }
+      }));
+
+      // Timeout safety
+      setTimeout(() => {
+        if (this.nativePendingRequests.has(requestId)) {
+          this.nativePendingRequests.delete(requestId);
+          reject(new Error('Native rendering timeout'));
+        }
+      }, 10000);
+    });
   }
 
   async getPageImageInternal(id, pageNumber, scale = 2.5) {

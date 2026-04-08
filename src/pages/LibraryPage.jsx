@@ -60,6 +60,7 @@ export default function LibraryPage({ onOpenEditor }) {
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [newBookName, setNewBookName] = useState('');
   const [isTablet, setIsTablet] = useState(window.innerWidth > 768);
+  const isNativeHost = typeof window !== 'undefined' && !!window.ReactNativeWebView;
   const [openMenuId, setOpenMenuId] = useState(null);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
@@ -77,6 +78,41 @@ export default function LibraryPage({ onOpenEditor }) {
   useEffect(() => {
     return onLangChange(() => setLangTick((n) => n + 1));
   }, []);
+
+  // Native Message Listener
+  useEffect(() => {
+    if (!isNativeHost) return;
+
+    const handleNativeMessage = async (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'PDF_PICKED') {
+          const { id, name, numPages } = data.payload;
+          
+          const newItem = {
+            id,
+            title: name.replace('.pdf', ''),
+            subject: 'Imported Document',
+            type: 'pdf', 
+            pageCount: numPages || 1, // Fallback to 1 if not provided yet
+            createdAt: new Date().toISOString()
+          };
+          
+          const updatedItems = [newItem, ...items];
+          setItems(updatedItems);
+          localStorage.setItem('user_library_items', JSON.stringify(updatedItems));
+          
+          setShowCreateTypeModal(false);
+          onOpenEditor(newItem);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    window.addEventListener('message', handleNativeMessage);
+    return () => window.removeEventListener('message', handleNativeMessage);
+  }, [items, onOpenEditor, isNativeHost]);
 
   const handleRestoreItem = (itemData) => {
     // Check if item already exists in library
@@ -197,6 +233,11 @@ export default function LibraryPage({ onOpenEditor }) {
   };
 
   const handlePdfUpload = async (e) => {
+    if (isNativeHost) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'PICK_PDF' }));
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -207,13 +248,11 @@ export default function LibraryPage({ onOpenEditor }) {
       const { numPages } = await pdfEngine.importPdf(id, file);
 
       // --- Super Fast Entry ---
-      // Pre-render only 2 pages for an instant entry feeling. 
-      // The rest will be rendered in the background once inside.
       const prefetchCount = Math.min(numPages, 2);
       for (let i = 1; i <= prefetchCount; i++) {
         try {
           setToastMessage(`กำลังเตรียมความพร้อมหน้าจอ... (${i}/2)`);
-          await pdfEngine.getPageDataUrl(id, i); // This populates the IndexedDB cache
+          await pdfEngine.getPageDataUrl(id, i); 
         } catch (pageErr) {
           console.warn(`[Library] Pre-render failed for page ${i}:`, pageErr);
         }

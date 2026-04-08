@@ -166,14 +166,22 @@ export default function NoteEditor({ item, onClose }) {
   useEffect(() => {
     if (item?.type === 'pdf') {
       // Warm up the document session
-      pdfEngine.ensureDocument(item.id);
+      pdfEngine.ensureDocument(item.id).then(pdf => {
+        // Correct the page count if it was unknown or wrong
+        if (pdf && pdf.numPages && pdf.numPages !== pages.length) {
+          console.log(`[NoteEditor] Syncing pages: ${pdf.numPages}`);
+          setPages(Array.from({ length: pdf.numPages }, (_, i) => i + 1));
+        }
+      }).catch(err => {
+        console.error("[NoteEditor] PDF sync failed:", err);
+      });
 
       // Aggressive Cleanup: Close the PDF session when leaving
       return () => {
         pdfEngine.closeDocument();
       };
     }
-  }, [item?.id]);
+  }, [item?.id, item?.pageCount]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
