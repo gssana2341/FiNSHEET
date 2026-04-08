@@ -100,7 +100,7 @@ export function useGestures(engine, options = {}) {
       if (isActuallyPen) {
         // Pointer state already updated in Analysis section
         canvas.isDrawingMode = isDrawingTool;
-        canvas.selection = !isDrawingTool;
+        canvas.selection = toolId === 'lasso';
         el.style.touchAction = "none";
         return;
       }

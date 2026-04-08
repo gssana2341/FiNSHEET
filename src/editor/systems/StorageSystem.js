@@ -1,17 +1,23 @@
+import localforage from 'localforage';
+
 /**
  * StorageSystem
  * Manages persistence for Notebooks and Pages.
- * Initial implementation uses LocalStorage, designed to be swapped for IndexedDB.
+ * Upgraded to IndexedDB via localforage to safely handle large PDF files without crashing.
  */
 class StorageSystem {
   constructor(namespace = 'note_editor_') {
     this.ns = namespace;
+    this.store = localforage.createInstance({
+      name: 'LovesheetNotes',
+      storeName: 'canvas_data'
+    });
   }
 
-  savePage(notebookId, pageNumber, data) {
+  async savePage(notebookId, pageNumber, data) {
     const key = `${this.ns}${notebookId}_p${pageNumber}`;
     try {
-      localStorage.setItem(key, data);
+      await this.store.setItem(key, data);
       return true;
     } catch (e) {
       console.error("Storage failed:", e);
@@ -19,24 +25,28 @@ class StorageSystem {
     }
   }
 
-  loadPage(notebookId, pageNumber) {
+  async loadPage(notebookId, pageNumber) {
     const key = `${this.ns}${notebookId}_p${pageNumber}`;
-    return localStorage.getItem(key);
+    try {
+      return await this.store.getItem(key);
+    } catch (e) {
+      console.error("Storage load failed:", e);
+      return null;
+    }
   }
 
-  deletePage(notebookId, pageNumber) {
+  async deletePage(notebookId, pageNumber) {
     const key = `${this.ns}${notebookId}_p${pageNumber}`;
-    localStorage.removeItem(key);
+    await this.store.removeItem(key);
   }
 
   // Notebook metadata
-  saveNotebookInfo(notebookId, info) {
-    localStorage.setItem(`${this.ns}meta_${notebookId}`, JSON.stringify(info));
+  async saveNotebookInfo(notebookId, info) {
+    await this.store.setItem(`${this.ns}meta_${notebookId}`, info);
   }
 
-  getNotebookInfo(notebookId) {
-    const data = localStorage.getItem(`${this.ns}meta_${notebookId}`);
-    return data ? JSON.parse(data) : null;
+  async getNotebookInfo(notebookId) {
+    return await this.store.getItem(`${this.ns}meta_${notebookId}`);
   }
 }
 

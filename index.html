@@ -13,6 +13,42 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
+  
+  <!-- Log Bridge: Pipes iPad logs back to your Computer Terminal via Expo -->
+  <script>
+    (function() {
+      const originalLog = console.log;
+      const originalError = console.error;
+      const originalWarn = console.warn;
+      
+      const sendToNative = (type, args) => {
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'LOG',
+            logType: type,
+            message: Array.from(args).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')
+          }));
+        }
+      };
+
+      console.log = function() {
+        originalLog.apply(console, arguments);
+        sendToNative('info', arguments);
+      };
+      console.error = function() {
+        originalError.apply(console, arguments);
+        sendToNative('error', arguments);
+      };
+      console.warn = function() {
+        originalWarn.apply(console, arguments);
+        sendToNative('warn', arguments);
+      };
+    })();
+  </script>
+
+  <!-- iPad Debugger Tool (Only for development) -->
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
 </head>
 
 <body>

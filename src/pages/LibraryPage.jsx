@@ -15,6 +15,7 @@ import FlashcardView from '../components/ai/FlashcardView';
 import UploadForm from '../components/creator/UploadForm';
 import NoteEditor from '../components/editing/NoteEditor';
 import Toast from '../components/ui/Toast';
+import { pdfEngine } from '../editor/systems/PdfEngine';
 import './StubPage.css';
 import './LibraryPage.css';
 
@@ -40,12 +41,24 @@ export default function LibraryPage({ onOpenEditor }) {
     localStorage.setItem('user_library_items', JSON.stringify(items));
   }, [items]);
 
+  // Listen for background updates (e.g., from NoteEditor closing)
+  useEffect(() => {
+    const handleUpdate = () => {
+      const saved = localStorage.getItem('user_library_items');
+      if (saved) setItems(JSON.parse(saved));
+    };
+    window.addEventListener('library-updated', handleUpdate);
+    return () => window.removeEventListener('library-updated', handleUpdate);
+  }, []);
+
   // Modals
   const [showCreateTypeModal, setShowCreateTypeModal] = useState(false);
   const [showAIModal, setShowAIModal] = useState(false);
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [showFlashcardModal, setShowFlashcardModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [newBookName, setNewBookName] = useState('');
   const [isTablet, setIsTablet] = useState(window.innerWidth > 768);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
@@ -104,7 +117,7 @@ export default function LibraryPage({ onOpenEditor }) {
     .filter((item) => {
       // 1. Tab filter
       if (activeTab === 'my') {
-        const isMyType = item.type === 'ai_summary' || item.type === 'purchased' || item.type === 'flashcard';
+        const isMyType = ['ai_summary', 'purchased', 'flashcard', 'notebook', 'pdf'].includes(item.type);
         if (!isMyType) return false;
       } else {
         return false;
@@ -136,18 +149,27 @@ export default function LibraryPage({ onOpenEditor }) {
       return 0;
     });
 
-  const handleCreateEmpty = () => {
+  const handleCreateEmptyClick = () => {
+    setShowCreateTypeModal(false);
+    setNewBookName('My Notebook');
+    setShowNameDialog(true);
+  };
+
+  const confirmCreateBook = () => {
     const newItem = {
       id: `new-${Date.now()}`,
-      title: 'Untitled Note',
-      subject: 'New Document',
-      type: 'ai_summary',
+      title: newBookName || 'Untitled Note',
+      subject: 'My Notes',
+      type: 'notebook', 
       pageCount: 1,
-      content: 'Start typing your notes here...',
       createdAt: new Date().toISOString()
     };
-    setItems([newItem, ...items]);
-    setShowCreateTypeModal(false);
+    
+    const updatedItems = [newItem, ...items];
+    setItems(updatedItems);
+    localStorage.setItem('user_library_items', JSON.stringify(updatedItems));
+    
+    setShowNameDialog(false);
     onOpenEditor(newItem);
   };
 
@@ -172,6 +194,55 @@ export default function LibraryPage({ onOpenEditor }) {
         setStreamedText(MOCK_SUMMARY.slice(0, idx));
       }
     }, 20);
+  };
+
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setToastMessage('กำลังนำเข้าไฟล์ PDF...');
+      const id = `pdf-${Date.now()}`;
+      
+      const { numPages } = await pdfEngine.importPdf(id, file);
+
+      // --- Super Fast Entry ---
+      // Pre-render only 2 pages for an instant entry feeling. 
+      // The rest will be rendered in the background once inside.
+      const prefetchCount = Math.min(numPages, 2);
+      for (let i = 1; i <= prefetchCount; i++) {
+        try {
+          setToastMessage(`กำลังเตรียมความพร้อมหน้าจอ... (${i}/2)`);
+          await pdfEngine.getPageDataUrl(id, i); // This populates the IndexedDB cache
+        } catch (pageErr) {
+          console.warn(`[Library] Pre-render failed for page ${i}:`, pageErr);
+        }
+      }
+
+      const newItem = {
+        id,
+        title: file.name.replace('.pdf', ''),
+        subject: 'Imported Document',
+        type: 'pdf', 
+        pageCount: numPages,
+        createdAt: new Date().toISOString()
+      };
+      
+      const updatedItems = [newItem, ...items];
+      setItems(updatedItems);
+      localStorage.setItem('user_library_items', JSON.stringify(updatedItems));
+      
+      setShowCreateTypeModal(false);
+      setToastMessage('');
+      onOpenEditor(newItem);
+
+    } catch (err) {
+      console.error(err);
+      setToastMessage('เกิดข้อผิดพลาดในการโหลด PDF');
+      setTimeout(() => setToastMessage(''), 3000);
+    }
+    // reset input
+    e.target.value = null;
   };
 
   const CreatorDashboard = () => (
@@ -462,13 +533,46 @@ export default function LibraryPage({ onOpenEditor }) {
               <p>นำเข้าไฟล์ PDF, สไลด์ และให้ AI ย่อยเนื้อหาพร้อมสร้าง Quiz ให้อัตโนมัติ</p>
             </div>
           </Card>
-          <Card variant="default" className="create-type-card" onClick={handleCreateEmpty}>
+          <Card variant="default" className="create-type-card" onClick={handleCreateEmptyClick}>
             <div className="create-type-icon"><FileText size={32} color="var(--color-info)"/></div>
             <div className="create-type-info">
               <h3>สมุดจด/สรุปว่างเปล่า</h3>
               <p>สร้างชีทใหม่ที่ไม่มีเนื้อหา เพื่อพิมพ์และจัดรูปแบบสรุปด้วยตัวเอง</p>
             </div>
           </Card>
+          <Card variant="default" className="create-type-card" onClick={() => document.getElementById('pdf-upload').click()}>
+            <div className="create-type-icon"><Upload size={32} color="var(--color-success)"/></div>
+            <div className="create-type-info">
+              <h3>นำเข้าไฟล์ PDF</h3>
+              <p>อัปโหลด PDF เพื่อเปิดอ่านและจดโน้ตทับเนื้อหาได้โดยตรง</p>
+            </div>
+            <input 
+              id="pdf-upload" 
+              type="file" 
+              accept="application/pdf" 
+              style={{ display: 'none' }} 
+              onChange={handlePdfUpload} 
+            />
+          </Card>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showNameDialog} onClose={() => setShowNameDialog(false)} title="ตั้งชื่อสมุดจด" size="sm">
+        <div style={{ padding: '20px 0', minWidth: '300px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-text)' }}>
+            Book Name (ชื่อสมุด)
+          </label>
+          <input 
+            type="text" 
+            value={newBookName}
+            onChange={(e) => setNewBookName(e.target.value)}
+            style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '16px', outline: 'none' }}
+            autoFocus
+          />
+          <div style={{ marginTop: '24px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <Button variant="outline" onClick={() => setShowNameDialog(false)}>ยกเลิก</Button>
+            <Button variant="primary" onClick={confirmCreateBook}>สร้างสมุดจด</Button>
+          </div>
         </div>
       </Modal>
       <Modal isOpen={showAIModal} onClose={() => { setShowAIModal(false); setStreamedText(''); setIsStreaming(false); }} title="AI Summary Generator" size="lg">

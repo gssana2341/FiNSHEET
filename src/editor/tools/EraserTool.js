@@ -27,15 +27,34 @@ class EraserTool extends BaseTool {
       this.engine.setInteractivity(false, true); // Clickable but not selectable
       this.canvas.defaultCursor = 'crosshair'; // Better cursor for precision
       
-      // Listener for object eraser
-      this.canvas.on('mouse:down', this.handleObjectClick);
+      // Listeners for object eraser
+      this.isDragging = false;
+      this.canvas.on('mouse:down', this.handleMouseDown);
+      this.canvas.on('mouse:move', this.handleMouseMove);
+      this.canvas.on('mouse:up', this.handleMouseUp);
     }
   }
 
-  handleObjectClick = (options) => {
-    if (this.type === 'object' && options.target) {
+  handleMouseDown = (options) => {
+    if (this.type === 'object') {
+      this.isDragging = true;
+      if (options.target) {
+        this.canvas.remove(options.target);
+        this.engine.emit('modified');
+      }
+    }
+  }
+
+  handleMouseMove = (options) => {
+    if (this.type === 'object' && this.isDragging && options.target) {
       this.canvas.remove(options.target);
       this.engine.emit('modified');
+    }
+  }
+
+  handleMouseUp = () => {
+    if (this.type === 'object') {
+      this.isDragging = false;
     }
   }
 
@@ -49,7 +68,10 @@ class EraserTool extends BaseTool {
   }
 
   deactivate() {
-    this.canvas.off('mouse:down', this.handleObjectClick);
+    this.canvas.off('mouse:down', this.handleMouseDown);
+    this.canvas.off('mouse:move', this.handleMouseMove);
+    this.canvas.off('mouse:up', this.handleMouseUp);
+    this.isDragging = false;
     this.canvas.defaultCursor = 'default';
     this.engine.setDrawingMode(false);
     this.engine.setSelection(true); // Restore default selection behavior

@@ -16,7 +16,7 @@ import { RefreshCcw, WifiOff } from 'lucide-react-native';
 // ── CONFIG ──
 // Use your local IP to connect from a physical device (Expo Go)
 // For Simulator, 'http://localhost:5173' works.
-const DEV_URL = 'http://192.168.0.114:5173'; 
+const DEV_URL = 'http://192.168.1.218:5173'; 
 
 export default function WebContainer() {
   const [loading, setLoading] = useState(true);

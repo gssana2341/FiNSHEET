@@ -12,7 +12,9 @@
   "dependencies": {
     "fabric": "^5.5.2",
     "fabric-eraser-brush": "^1.0.1",
+    "localforage": "^1.10.0",
     "lucide-react": "^1.7.0",
+    "pdfjs-dist": "^5.6.205",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-zoom-pan-pinch": "^4.0.3"

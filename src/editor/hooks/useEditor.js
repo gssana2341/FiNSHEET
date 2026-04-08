@@ -54,10 +54,11 @@ export function useEditor(id, canvasElement, width, height) {
     historyRef.current = history;
 
     // 4. Load initial data
-    const savedData = storageRef.current.loadPage('notebook_1', id);
-    if (savedData) {
-      engine.loadData(savedData);
-    }
+    storageRef.current.loadPage('notebook_1', id).then(savedData => {
+      if (savedData && !engine.isDisposed) {
+        engine.loadData(savedData);
+      }
+    });
 
     // 5. Initial tool setup
     toolManager.setActiveTool('pen', { color: '#000000', size: 2 });
@@ -92,6 +93,21 @@ export function useEditor(id, canvasElement, width, height) {
       storageRef.current.savePage('notebook_1', id, data);
     }
   }, [id]);
+
+  // --- Auto-Save System ---
+  useEffect(() => {
+    if (!isReady || !engineRef.current) return;
+    const engine = engineRef.current;
+    
+    const handleModified = () => {
+      save(); // Save instantly since 'modified' only fires on stroke completion/object dropped
+    };
+
+    engine.on('modified', handleModified);
+    return () => {
+      engine.off('modified', handleModified);
+    };
+  }, [isReady, save]);
 
   return {
     isReady,

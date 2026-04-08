@@ -9,7 +9,57 @@ import {
 } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import FabricPage from './FabricPage';
+import { pdfEngine } from '../../editor/systems/PdfEngine';
 import './NoteEditor.css';
+
+// Lightweight component to show the PDF page image instantly without the heavy Fabric engine
+const PdfPreviewStatic = ({ pdfId, pageNumber, width, scale = 2.5 }) => {
+  const [preview, setPreview] = useState(null);
+  const objectUrlRef = useRef(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    pdfEngine.requestPageImage(pdfId, pageNumber, scale, 'low').then(res => {
+      if (isMounted) {
+        if (res.blob) {
+          const url = URL.createObjectURL(res.blob);
+          objectUrlRef.current = url;
+          setPreview({ url, pageWidth: res.pageWidth, pageHeight: res.pageHeight });
+        } else if (res.dataUrl) {
+          setPreview({ url: res.dataUrl, pageWidth: res.pageWidth, pageHeight: res.pageHeight });
+        }
+      }
+    });
+
+    return () => { 
+      isMounted = false; 
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+    };
+  }, [pdfId, pageNumber]);
+
+  if (!preview) return (
+    <div style={{ height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+      <div className="loader-spinner"></div>
+    </div>
+  );
+
+  const aspectRatio = preview.pageHeight / preview.pageWidth;
+  const h = Math.round(width * aspectRatio);
+
+  return (
+    <div style={{ width: '100%', height: h, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <img 
+        src={preview.url} 
+        alt="" 
+        style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+      />
+    </div>
+  );
+};
+
 
 export default function NoteEditor({ item, onClose }) {
   // --- Tool System State ---
@@ -24,11 +74,26 @@ export default function NoteEditor({ item, onClose }) {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [toast, setToast] = useState(null);
   const [paperStyle, setPaperStyle] = useState('ruled'); 
-  const [pages, setPages] = useState([1, 2, 3]); 
+  const [pages, setPages] = useState(() => {
+    if (item?.pageCount) return Array.from({ length: item.pageCount }, (_, i) => i + 1);
+    return [1, 2, 3];
+  }); 
   const [navMode, setNavMode] = useState('centered'); 
   const [currentScale, setCurrentScale] = useState(1);
   const [penOnlyMode, setPenOnlyMode] = useState(false);
   const [activePage, setActivePage] = useState(1);
+
+  const savePosTimer = useRef(null);
+  const didMountRef = useRef(false);
+
+  const savedPos = React.useMemo(() => {
+    try {
+      if (!item?.id) return null;
+      const saved = localStorage.getItem(`note_pos_${item.id}`);
+      if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return null;
+  }, [item?.id]);
 
   const handlePenDetected = React.useCallback(() => {
     if (!isPenVerified) {
@@ -42,6 +107,16 @@ export default function NoteEditor({ item, onClose }) {
   const toolbarRef = useRef(null);
   const pageRefs = useRef({});
   const isTablet = window.innerWidth >= 768;
+  const isMobile = /iPad|iPhone|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  // Use adaptive settings for iPad/Mobile to prevent crashes
+  const highResScale = isMobile ? 2.0 : 2.5; 
+  const previewScale = isMobile ? 1.0 : 1.2; // Low res for scrolling
+  const nearbyBuffer = isMobile ? 1 : 3;
+
+  useEffect(() => {
+    console.log(`[NoteEditor] Performance Mode: ${isMobile ? 'iPad' : 'Desktop'}. Preview: ${previewScale}x, Active: ${highResScale}x`);
+  }, []);
 
   const showToast = (message, icon) => {
     setToast({ message, icon });
@@ -72,10 +147,63 @@ export default function NoteEditor({ item, onClose }) {
 
   useEffect(() => {
     if (navMode === 'centered') {
+      if (!didMountRef.current && savedPos) {
+        didMountRef.current = true;
+        return;
+      }
       const timer = setTimeout(recenter, 50); 
+      didMountRef.current = true;
       return () => clearTimeout(timer);
     }
-  }, [navMode, recenter]);
+    didMountRef.current = true;
+  }, [navMode, recenter, savedPos]);
+
+  // --- Intelligent Viewport Mounting ---
+  // We keep all DIVs but only mount the heavy Fabric canvases for visible pages.
+  const [visiblePages, setVisiblePages] = useState(new Set([1]));
+  
+  // PDF Document Session Management (Lifecycle)
+  useEffect(() => {
+    if (item?.type === 'pdf') {
+      // Warm up the document session
+      pdfEngine.ensureDocument(item.id);
+
+      // Aggressive Cleanup: Close the PDF session when leaving
+      return () => {
+        pdfEngine.closeDocument();
+      };
+    }
+  }, [item?.id]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setVisiblePages(prev => {
+          const next = new Set(prev);
+          entries.forEach(entry => {
+            const pageNum = parseInt(entry.target.getAttribute('data-page-num'));
+            if (entry.isIntersecting) {
+              next.add(pageNum);
+            } else {
+              next.delete(pageNum);
+            }
+          });
+          
+          // Also update activePage for sync
+          const top = entries.find(e => e.isIntersecting && e.intersectionRatio > 0.5);
+          if (top) setActivePage(parseInt(top.target.getAttribute('data-page-num')));
+          
+          return next;
+        });
+      },
+      { threshold: [0.1, 0.5] }
+    );
+
+    const pageElements = document.querySelectorAll('.floating-page-sheet');
+    pageElements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [pages.length]);
 
   // --- Click Outside to Close Submenus ---
   useEffect(() => {
@@ -107,6 +235,42 @@ export default function NoteEditor({ item, onClose }) {
     showToast("Progress Saved", <Save size={16} />);
   };
 
+  const handleClose = () => {
+    // Force save all pages before exiting to prevent losing data during debounce
+    Object.values(pageRefs.current).forEach(page => {
+      if (page && page.save) page.save();
+    });
+
+    // Generate cover thumbnail upon exit
+    const p1Canvas = pageRefs.current[1]?.getCanvas();
+    if (p1Canvas && item) {
+      try {
+        const coverDataUrl = p1Canvas.toDataURL({
+          format: 'jpeg',
+          quality: 0.6,
+          multiplier: 0.3
+        });
+        
+        const savedStr = localStorage.getItem('user_library_items');
+        if (savedStr) {
+          const itemsArray = JSON.parse(savedStr);
+          const idx = itemsArray.findIndex(i => i.id === item.id);
+          if (idx !== -1) {
+            itemsArray[idx].coverUrl = coverDataUrl;
+            itemsArray[idx].updatedAt = new Date().toISOString();
+            localStorage.setItem('user_library_items', JSON.stringify(itemsArray));
+            // Dispatch a global event to let library page refresh instantly if needed
+            window.dispatchEvent(new Event('library-updated'));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to generate cover:", err);
+      }
+    }
+    
+    onClose();
+  };
+
   // --- Toolbar Config ---
   const mainTools = [
     { id: 'lasso', icon: MousePointer, label: 'Lasso', sub: false },
@@ -136,7 +300,7 @@ export default function NoteEditor({ item, onClose }) {
       {/* 🚀 PROFESSIONAL TOOLBAR */}
       <div className="pro-floating-toolbar animate-slide-down" ref={toolbarRef}>
         <div className="toolbar-inner">
-          <button className="tb-back-btn" onClick={onClose}><ChevronLeft size={20}/></button>
+          <button className="tb-back-btn" onClick={handleClose}><ChevronLeft size={20}/></button>
           
           <div className="tb-divider" />
 
@@ -263,12 +427,25 @@ export default function NoteEditor({ item, onClose }) {
       <main className="workspace-light">
         <TransformWrapper
           ref={transformRef}
-          initialScale={1}
+          initialScale={savedPos?.scale ?? 1}
           minScale={0.3}
           maxScale={6}
           limitToBounds={navMode === 'centered'}
-          centerOnInit={true}
-          onTransformed={(ref) => setCurrentScale(ref.state.scale)}
+          initialPositionX={savedPos?.x ?? (isTablet ? (window.innerWidth - 2840) / 2 : -980)}
+          initialPositionY={savedPos?.y ?? -940}
+          onTransformed={(ref) => {
+            setCurrentScale(ref.state.scale);
+            clearTimeout(savePosTimer.current);
+            savePosTimer.current = setTimeout(() => {
+              if (item?.id) {
+                localStorage.setItem(`note_pos_${item.id}`, JSON.stringify({
+                  x: ref.state.positionX,
+                  y: ref.state.positionY,
+                  scale: ref.state.scale
+                }));
+              }
+            }, 300);
+          }}
           onPanningStart={(_, event) => {
             const nativeEvent = event.nativeEvent || event;
             const isPen = event.pointerType === 'pen' || event.pressure > 0 || (nativeEvent.touches && nativeEvent.touches[0]?.touchType === 'stylus');
@@ -304,28 +481,54 @@ export default function NoteEditor({ item, onClose }) {
               touchAction: (isInteractiveTool && !penOnlyMode) ? 'none' : 'auto'
             }}
           >
-            {pages.map((pageNumber) => (
-              <div 
-                key={pageNumber} 
-                onMouseEnter={() => setActivePage(pageNumber)}
-                className={`floating-page-sheet sheet-style-${paperStyle} ${activePage === pageNumber ? 'active-page' : ''}`} 
-                style={{ width: isTablet ? "840px" : "calc(100vw - 40px)", minHeight: "1180px", marginBottom: "40px", background: 'white' }}
-              >
-                <FabricPage 
-                  ref={el => pageRefs.current[pageNumber] = el}
-                  id={`${item.id}-${pageNumber}`}
-                  width={isTablet ? 840 : window.innerWidth - 40}
-                  height={1180}
-                  activeTool={activeTool}
-                  brushColor={brushColor}
-                  brushSize={brushSize}
-                  eraserType={eraserType}
-                  penOnlyMode={penOnlyMode}
-                  onPenDetected={handlePenDetected}
-                />
-                <div className="page-number-footer">{pageNumber}</div>
-              </div>
-            ))}
+            {pages.map((pageNumber) => {
+              // Only mount the heavy rendering engine if the page is visible or nearby
+              const isVisible = visiblePages.has(pageNumber);
+              const isNearby = Math.abs(pageNumber - activePage) <= nearbyBuffer;
+              const shouldMountCanvas = isVisible || isNearby;
+
+              return (
+                <div 
+                  key={pageNumber} 
+                  data-page-num={pageNumber}
+                  className={`floating-page-sheet ${item?.type === 'pdf' ? 'pdf-page' : `sheet-style-${paperStyle}`}`} 
+                  style={{ 
+                    width: isTablet ? "840px" : "calc(100vw - 40px)", 
+                    minHeight: item?.type === 'pdf' ? "auto" : "1180px", 
+                    marginBottom: "40px" 
+                  }}
+                >
+                  {/* The actual Canvas / Drawing Tool */}
+                  {shouldMountCanvas ? (
+                    <FabricPage 
+                      ref={el => pageRefs.current[pageNumber] = el}
+                      id={`${item.id}-${pageNumber}`}
+                      pdfId={item?.type === 'pdf' ? item.id : null}
+                      pageNumber={pageNumber}
+                      width={isTablet ? 840 : window.innerWidth - 40}
+                      height={1180}
+                      activeTool={activeTool}
+                      brushColor={brushColor}
+                      brushSize={brushSize}
+                      eraserType={eraserType}
+                      penOnlyMode={penOnlyMode}
+                      onPenDetected={handlePenDetected}
+                      scale={highResScale}
+                    />
+                  ) : (
+                    /* The "Ghost Image" - Ultra lightweight preview at 1.2x */
+                    <PdfPreviewStatic 
+                      pdfId={item.id} 
+                      pageNumber={pageNumber} 
+                      width={isTablet ? 840 : window.innerWidth - 40} 
+                      scale={previewScale}
+                    />
+                  )}
+
+                  <div className="page-number-footer">{pageNumber}</div>
+                </div>
+              );
+            })}
             
             <button className="add-page-plus-btn" onClick={addPage}>
               <Plus size={24} />
