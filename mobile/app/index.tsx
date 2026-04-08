@@ -16,7 +16,7 @@ import { RefreshCcw, WifiOff } from 'lucide-react-native';
 // ── CONFIG ──
 // Use your local IP to connect from a physical device (Expo Go)
 // For Simulator, 'http://localhost:5173' works.
-const DEV_URL = 'http://192.168.1.218:5173'; 
+const DEV_URL = 'http://192.168.0.114:5173'; 
 
 export default function WebContainer() {
   const [loading, setLoading] = useState(true);
@@ -42,10 +42,25 @@ export default function WebContainer() {
           onLoadEnd={() => setLoading(false)}
           onError={() => setError(true)}
           // Enable common web features
+          onMessage={(event) => {
+            const rawData = event.nativeEvent.data;
+            // Immediate log to terminal so we see anything coming in
+            console.log(">>> [WEBVIEW EVENT]:", rawData);
+            
+            try {
+              const data = JSON.parse(rawData);
+              if (data.type === 'LOG') {
+                console.log(`\x1b[36m[BROWSER LOG]\x1b[0m ${data.message}`);
+              }
+            } catch (e) {
+              // Ignore parse errors for non-JSON messages
+            }
+          }}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           allowsBackForwardNavigationGestures={true}
           pullToRefreshEnabled={true}
+          keyboardDisplayRequiresUserAction={false}
         />
 
         {/* Loading Overlay */}

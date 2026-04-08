@@ -4,7 +4,8 @@ import {
   Pen, Eraser, MousePointer2, Highlighter, 
   GripVertical, Target, Maximize2, CheckCircle2,
   Type, Square, Circle, Minus, MousePointer, 
-  ChevronDown, Trash2, Eraser as EraserIcon
+  ChevronDown, Trash2, Eraser as EraserIcon,
+  RotateCcw, RotateCw, Save, Hand
 } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import FabricPage from './FabricPage';
@@ -17,6 +18,7 @@ export default function NoteEditor({ item, onClose }) {
   const [brushSize, setBrushSize] = useState(2);
   const [eraserType, setEraserType] = useState('partial'); // 'partial' | 'object'
   const [activeSubMenu, setActiveSubMenu] = useState(null); 
+  const [isPenVerified, setIsPenVerified] = useState(false);
   
   // --- UI & Navigation State ---
   const [showAiPanel, setShowAiPanel] = useState(false);
@@ -25,10 +27,19 @@ export default function NoteEditor({ item, onClose }) {
   const [pages, setPages] = useState([1, 2, 3]); 
   const [navMode, setNavMode] = useState('centered'); 
   const [currentScale, setCurrentScale] = useState(1);
-  const [penOnlyMode, setPenOnlyMode] = useState(true); // Default to iPad optimized
+  const [penOnlyMode, setPenOnlyMode] = useState(false);
+  const [activePage, setActivePage] = useState(1);
+
+  const handlePenDetected = React.useCallback(() => {
+    if (!isPenVerified) {
+      setIsPenVerified(true);
+      showToast("Apple Pencil Verified", <CheckCircle2 size={16} color="#22C55E" />);
+    }
+  }, [isPenVerified]);
   
   // Refs
   const transformRef = useRef(null);
+  const toolbarRef = useRef(null);
   const pageRefs = useRef({});
   const isTablet = window.innerWidth >= 768;
 
@@ -46,6 +57,8 @@ export default function NoteEditor({ item, onClose }) {
   const recenter = React.useCallback(() => {
     if (transformRef.current) {
       const { setTransform, instance } = transformRef.current;
+      if (!instance || !instance.transformState) return;
+      
       const { positionY, scale } = instance.transformState;
       const wrapper = document.querySelector('.react-transform-wrapper');
       const content = document.querySelector('.react-transform-component');
@@ -64,6 +77,36 @@ export default function NoteEditor({ item, onClose }) {
     }
   }, [navMode, recenter]);
 
+  // --- Click Outside to Close Submenus ---
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (toolbarRef.current && !toolbarRef.current.contains(event.target)) {
+        setActiveSubMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
+
+  // --- Global Actions (Page Specific) ---
+  const handleUndo = () => {
+    pageRefs.current[activePage]?.undo();
+  };
+
+  const handleRedo = () => {
+    pageRefs.current[activePage]?.redo();
+  };
+
+  const handleManualSave = () => {
+    pageRefs.current[activePage]?.save();
+    showToast("Progress Saved", <Save size={16} />);
+  };
+
   // --- Toolbar Config ---
   const mainTools = [
     { id: 'lasso', icon: MousePointer, label: 'Lasso', sub: false },
@@ -75,24 +118,34 @@ export default function NoteEditor({ item, onClose }) {
   ];
 
   const handleToolClick = (toolId, hasSub) => {
-    if (activeTool === toolId && hasSub) {
-      setActiveSubMenu(activeSubMenu === toolId ? null : toolId);
+    if (activeTool === toolId) {
+      if (hasSub) {
+        setActiveSubMenu(activeSubMenu === toolId ? null : toolId);
+      }
     } else {
       setActiveTool(toolId);
-      setActiveSubMenu(hasSub ? toolId : null);
+      setActiveSubMenu(null); 
     }
   };
 
-  const handleSavePage = (pageNumber, json) => {
-    localStorage.setItem(`note_data_fabric_${item.id}_${pageNumber}`, json);
-  };
+  // --- Interactive Tool Detection ---
+  const isInteractiveTool = ['pen', 'highlighter', 'eraser', 'lasso', 'text', 'rectangle', 'circle', 'line', 'shape'].includes(activeTool);
 
   return (
     <div className={`note-editor zen-mode ${isTablet ? 'tablet-view' : 'mobile-view'}`}>
       {/* 🚀 PROFESSIONAL TOOLBAR */}
-      <div className="pro-floating-toolbar animate-slide-down">
+      <div className="pro-floating-toolbar animate-slide-down" ref={toolbarRef}>
         <div className="toolbar-inner">
           <button className="tb-back-btn" onClick={onClose}><ChevronLeft size={20}/></button>
+          
+          <div className="tb-divider" />
+
+          {/* HISTORY GROUP */}
+          <div className="tb-actions-group">
+            <button className="tb-action-btn" onClick={handleUndo} title="Undo"><RotateCcw size={18} /></button>
+            <button className="tb-action-btn" onClick={handleRedo} title="Redo"><RotateCw size={18} /></button>
+          </div>
+
           <div className="tb-divider" />
           
           <div className="tb-tools-group">
@@ -103,10 +156,9 @@ export default function NoteEditor({ item, onClose }) {
                   onClick={() => handleToolClick(tool.id, tool.sub)}
                 >
                   <tool.icon size={20} />
-                  {tool.sub && <ChevronDown size={10} className="sub-indicator" />}
                 </button>
                 
-                {/* PEN SUB MENU */}
+                {/* TOOL SUBMENUS (PEN, ERASER, SHAPE) */}
                 {activeSubMenu === tool.id && tool.id === 'pen' && (
                   <div className="tb-sub-menu animate-pop-in">
                     <div className="sub-menu-section">
@@ -131,20 +183,19 @@ export default function NoteEditor({ item, onClose }) {
                   </div>
                 )}
 
-                {/* ERASER SUB MENU */}
                 {activeSubMenu === tool.id && tool.id === 'eraser' && (
                   <div className="tb-sub-menu animate-pop-in">
                     <button 
                       className={`sub-tool-item ${eraserType === 'partial' ? 'active' : ''}`} 
                       onClick={() => { setEraserType('partial'); setActiveSubMenu(null); }}
                     >
-                      <EraserIcon size={18} /><span>Partial Erase (Pixel)</span>
+                      <EraserIcon size={18} /><span>Partial Erase</span>
                     </button>
                     <button 
                       className={`sub-tool-item ${eraserType === 'object' ? 'active' : ''}`} 
                       onClick={() => { setEraserType('object'); setActiveSubMenu(null); }}
                     >
-                      <Trash2 size={18} /><span>Object Erase (Full Stroke)</span>
+                      <Trash2 size={18} /><span>Object Erase</span>
                     </button>
                     <div className="sub-menu-divider" />
                     <div className="sub-menu-section">
@@ -174,34 +225,27 @@ export default function NoteEditor({ item, onClose }) {
           <div className="tb-divider" />
           
           <div className="tb-actions-group">
+            <button className="tb-action-btn" onClick={handleManualSave} title="Save Now"><Save size={18} /></button>
             <button 
               className="tb-action-btn"
+              title="Paper Style"
               onClick={() => {
                 const styles = ['blank', 'ruled', 'grid', 'dotted'];
                 const next = styles[(styles.indexOf(paperStyle) + 1) % styles.length];
                 setPaperStyle(next);
-                showToast(`Style: ${next.toUpperCase()}`, <Layout size={16}/>);
               }}
             >
               <Layout size={20} />
             </button>
-            <div className="tb-divider" />
-            
-            {/* iPad Optimized Mode Toggle */}
             <button 
               className={`tb-action-btn ${penOnlyMode ? 'active text-primary' : ''}`}
-              title="iPad Pen Only Mode"
-              onClick={() => {
-                setPenOnlyMode(!penOnlyMode);
-                showToast(penOnlyMode ? "Finger Draw Enabled" : "Pen Only Mode", <Pen size={16}/>);
-              }}
+              title={penOnlyMode ? "Pencil Mode Active" : "Enable Smart Pen Mode"}
+              onClick={() => setPenOnlyMode(!penOnlyMode)}
             >
-              <Target size={20} />
+              <Target size={20} className={penOnlyMode && !isPenVerified ? "animate-pulse" : ""} />
             </button>
-
-            <div className="tb-divider" />
             <button className="tb-action-btn" onClick={() => setNavMode(navMode === 'free' ? 'centered' : 'free')}>
-              {navMode === 'centered' ? <Target size={20} className="text-primary" /> : <Maximize2 size={20} />}
+              {navMode === 'centered' ? <Maximize2 size={20} className="text-primary" /> : <Maximize2 size={20} />}
             </button>
             <button className="tb-action-btn" onClick={() => setShowAiPanel(!showAiPanel)}>
               <Sparkles size={20} color={showAiPanel ? 'var(--color-primary)' : '#64748b'} />
@@ -210,7 +254,12 @@ export default function NoteEditor({ item, onClose }) {
         </div>
       </div>
 
-      {/* 📘 CONTINUOUS SCROLL WORKSPACE */}
+      <div style={{ position: 'fixed', top: '20px', right: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+        <button onClick={() => setPenOnlyMode(!penOnlyMode)} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 20px', borderRadius: '50px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', cursor: 'pointer', backgroundColor: penOnlyMode ? '#F97316' : '#FFFFFF', color: penOnlyMode ? '#FFFFFF' : '#334155' }}>
+          {penOnlyMode ? (<><Target size={18} className="animate-pulse" /><span style={{ fontWeight: 700, fontSize: '14px' }}>Pen Only Mode</span></>) : (<><Hand size={18} color="#64748b" /><span style={{ fontWeight: 600, fontSize: '14px' }}>Normal Mode</span></>)}
+        </button>
+      </div>
+
       <main className="workspace-light">
         <TransformWrapper
           ref={transformRef}
@@ -219,14 +268,30 @@ export default function NoteEditor({ item, onClose }) {
           maxScale={6}
           limitToBounds={navMode === 'centered'}
           centerOnInit={true}
-          centerZoomedOut={navMode === 'centered'}
           onTransformed={(ref) => setCurrentScale(ref.state.scale)}
-          panning={{ 
-            excluded: ["canvas", "button"],
-            // If pen-only mode is active, finger pan is ALWAYS enabled
-            disabled: !penOnlyMode && (activeTool === 'pen' || activeTool === 'highlighter' || activeTool === 'eraser'),
-            lockAxisX: navMode === 'centered' && (currentScale * (isTablet ? 840 : window.innerWidth) <= window.innerWidth),
+          onPanningStart={(_, event) => {
+            const nativeEvent = event.nativeEvent || event;
+            const isPen = event.pointerType === 'pen' || event.pressure > 0 || (nativeEvent.touches && nativeEvent.touches[0]?.touchType === 'stylus');
+            const isMultiTouch = (nativeEvent.touches && nativeEvent.touches.length > 1);
+
+            if (isMultiTouch) return true; // Always allow multi-touch zoom/pan
+
+            // SMART PEN MODE
+            if (penOnlyMode) {
+              return !isPen; // Block pen panning, allow 1-finger panning
+            }
+
+            // NORMAL MODE
+            // Block 1-finger panning if an interactive tool is selected
+            if (isInteractiveTool || isPen) return false;
+            return true;
           }}
+          panning={{ 
+            excluded: ["button"],
+            disabled: false, 
+            lockAxisX: navMode === 'centered',
+          }}
+          doubleClick={{ disabled: true }}
         >
           <TransformComponent
             wrapperStyle={{ width: "100%", height: "100%", overflow: "hidden" }}
@@ -234,19 +299,17 @@ export default function NoteEditor({ item, onClose }) {
               display: "flex", 
               flexDirection: "column", 
               alignItems: "center", 
-              padding: "800px 1000px",
+              padding: "1000px",
+              // CRITICAL FIX: Block browser-level panning at CSS level when drawing in Normal Mode
+              touchAction: (isInteractiveTool && !penOnlyMode) ? 'none' : 'auto'
             }}
           >
             {pages.map((pageNumber) => (
               <div 
                 key={pageNumber} 
-                className={`floating-page-sheet sheet-style-${paperStyle} animate-fade-in`} 
-                style={{ 
-                  width: isTablet ? "840px" : "calc(100vw - 40px)", 
-                  minHeight: "1180px", 
-                  marginBottom: "40px",
-                  background: 'white'
-                }}
+                onMouseEnter={() => setActivePage(pageNumber)}
+                className={`floating-page-sheet sheet-style-${paperStyle} ${activePage === pageNumber ? 'active-page' : ''}`} 
+                style={{ width: isTablet ? "840px" : "calc(100vw - 40px)", minHeight: "1180px", marginBottom: "40px", background: 'white' }}
               >
                 <FabricPage 
                   ref={el => pageRefs.current[pageNumber] = el}
@@ -258,8 +321,7 @@ export default function NoteEditor({ item, onClose }) {
                   brushSize={brushSize}
                   eraserType={eraserType}
                   penOnlyMode={penOnlyMode}
-                  initialData={localStorage.getItem(`note_data_fabric_${item.id}_${pageNumber}`)}
-                  onSave={(json) => handleSavePage(pageNumber, json)}
+                  onPenDetected={handlePenDetected}
                 />
                 <div className="page-number-footer">{pageNumber}</div>
               </div>
@@ -275,7 +337,7 @@ export default function NoteEditor({ item, onClose }) {
         {showAiPanel && (
           <aside className="ai-sidebar-light animate-slide-left">
             <div className="ai-sb-header"><Sparkles size={18} className="text-primary" /><h3>AI Assistant</h3><button className="sb-close" onClick={() => setShowAiPanel(false)}><X size={16} /></button></div>
-            <div className="ai-sb-content"><div className="ai-bubble-msg">How can I help you today?</div></div>
+            <div className="ai-sb-content"><div className="ai-bubble-msg">System refactored to Modular Architecture. How can I help?</div></div>
           </aside>
         )}
 
